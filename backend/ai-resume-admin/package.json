@@ -1,0 +1,38 @@
+{
+  "name": "ai-resume-admin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A Strapi application",
+  "scripts": {
+    "build": "strapi build",
+    "console": "strapi console",
+    "deploy": "strapi deploy",
+    "dev": "strapi develop",
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "strapi": "strapi",
+    "upgrade": "npx @strapi/upgrade latest",
+    "upgrade:dry": "npx @strapi/upgrade latest --dry"
+  },
+  "dependencies": {
+    "@google/genai": "^2.4.0",
+    "@strapi/plugin-cloud": "5.45.1",
+    "@strapi/plugin-users-permissions": "5.45.1",
+    "@strapi/strapi": "5.45.1",
+    "mime": "^4.1.0",
+    "mysql2": "3.20.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0",
+    "uuid": "^14.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=24.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "uuid": "84a90881-5319-4b41-83d0-9a2830d1c49d",
+    "installId": "eb118de3fdf85cb3f1772efb37149fe279a5a369a4d1000b66c2e09909e96cf6"
+  }
+}
