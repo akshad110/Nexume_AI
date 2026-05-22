@@ -47,6 +47,31 @@
     },
     "experience": {
       "type": "json"
+    },
+    "education": {
+      "type": "component",
+      "component": "education.education",
+      "repeatable": true
+    },
+    "skills": {
+      "type": "component",
+      "component": "skills.skills",
+      "repeatable": true
+    },
+    "themeColor": {
+      "type": "string"
+    },
+    "templateId": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "projects": {
+      "type": "json"
+    },
+    "programmingSkills": {
+      "type": "json"
     }
   }
 }
