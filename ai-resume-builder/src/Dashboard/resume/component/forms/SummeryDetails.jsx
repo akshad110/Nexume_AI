@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Textarea } from "@/components/ui/textarea"
 import { ResumeInfoContext } from '@/context/ResumeContext'
 import { useParams } from 'react-router-dom';
@@ -16,15 +16,17 @@ function SummeryDetails({enableNext}) {
     const [loading,setLoading]=useState(false);
     const [aiGeneratedSummary,setAiGeneratedSummary]=useState([]);
     const params=useParams();
+    const initializedFor = useRef(null);
 
-    useEffect(()=>{
-        summery&&setResumeInfo(
-            {
-                ...resumeInfo,
-                summery:summery
-            }
-        )
-    },[summery])
+    useEffect(() => {
+        const id = resumeInfo?.documentId;
+        if (!id || initializedFor.current === id) return;
+        initializedFor.current = id;
+        if (resumeInfo?.summery) {
+            setSummery(resumeInfo.summery);
+            enableNext(true);
+        }
+    }, [resumeInfo?.documentId]);
 
     const GenerateSummeryFromAI=async()=>{
     setLoading(true);
@@ -70,8 +72,15 @@ function SummeryDetails({enableNext}) {
             onClick={()=>GenerateSummeryFromAI()}
             ><Brain className='h-4 w-4'/> Generate With AI</Button>
         </div>
-        <Textarea className='mt-5' required
-        onChange={(e)=>setSummery(e.target.value)}
+        <Textarea
+        className='mt-5'
+        required
+        value={summery ?? ""}
+        onChange={(e) => {
+          const value = e.target.value
+          setSummery(value)
+          setResumeInfo((prev) => ({ ...prev, summery: value }))
+        }}
         />
       <div className='mt-2 flex justify-end'>
          <Button type="submit"

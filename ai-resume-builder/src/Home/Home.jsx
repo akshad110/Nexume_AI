@@ -12,14 +12,13 @@
 
 // export default Home
 import Header from '@/components/custom/Header'
-import { UserButton } from '@clerk/react'
 import { AtomIcon, Edit, Share2 } from 'lucide-react'
 import React from 'react'
 
 function Home() {
   return (
     <div>
-      <Header/>
+      <Header />
       <div>
       {/* <img src={'/grid.svg'} className="absolute z-[-10] w-full" 
       width={1200} height={300} /> */}

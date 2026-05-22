@@ -1,54 +1,104 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 import PersonalDetailForm from "./forms/PersonalDetailForm";
-import { ArrowRight, LayoutGrid, ArrowLeft } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SummeryDetails from "./forms/SummeryDetails";
 import ExperienceDetails from "./forms/ExperienceDetails";
 import EducationDetails from "./forms/EducationDetails";
-
+import SkillsDetails from "./forms/SkillsDetails";
+import ProjectsDetails from "./forms/ProjectsDetails";
+import ProgrammingSkillsDetails from "./forms/ProgrammingSkillsDetails";
+import ThemePicker from "./ThemePicker";
+import { ResumeInfoContext } from "@/context/ResumeContext";
+import { getStepCount, getStepKey, getStepLabel, getTemplateMeta } from "@/data/resumeTemplates";
+import { parseFormStep, canEnableNextForStep } from "@/lib/resumeFormSteps";
 
 function FormSection() {
-  const [activeFormIndex, setActiveFormIndex] = useState(1);
-  const [enableNext,setEnableNext]=useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { resumeInfo } = useContext(ResumeInfoContext);
+  const templateId = resumeInfo?.templateId;
+  const stepCount = getStepCount(templateId);
+  const activeFormIndex = parseFormStep(searchParams, templateId);
+  const activeStepKey = getStepKey(templateId, activeFormIndex);
+  const [enableNext, setEnableNext] = useState(false);
+
+  const goToStep = (step) => {
+    const nextStep = Math.min(Math.max(step, 1), stepCount);
+    setSearchParams({ step: String(nextStep) }, { replace: true });
+  };
+
+  useEffect(() => {
+    setEnableNext(canEnableNextForStep(activeFormIndex, resumeInfo, templateId));
+  }, [activeFormIndex, resumeInfo, templateId]);
+
+  if (!resumeInfo) {
+    return (
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const renderStepForm = () => {
+    switch (activeStepKey) {
+      case "personal":
+        return <PersonalDetailForm enableNext={(v) => setEnableNext(v)} />;
+      case "summary":
+        return <SummeryDetails enableNext={(v) => setEnableNext(v)} />;
+      case "experience":
+        return <ExperienceDetails enableNext={(v) => setEnableNext(v)} />;
+      case "education":
+        return <EducationDetails />;
+      case "skills":
+        return <SkillsDetails />;
+      case "projects":
+        return <ProjectsDetails />;
+      case "programmingSkills":
+        return <ProgrammingSkillsDetails />;
+      default:
+        return <PersonalDetailForm enableNext={(v) => setEnableNext(v)} />;
+    }
+  };
 
   return (
     <div>
+      <p className="text-sm text-muted-foreground mt-2 mb-1">
+        Template:{" "}
+        <span className="font-medium text-foreground">
+          {getTemplateMeta(templateId).name}
+        </span>
+        {" · "}
+        Step {activeFormIndex} of {stepCount}:{" "}
+        <span className="font-medium text-foreground">
+          {getStepLabel(activeStepKey)}
+        </span>
+      </p>
       <div className="flex items-center justify-between">
-        <Button className="flex gap-2" variant="outline">
-          {" "}
-          <LayoutGrid /> Theme
-        </Button>
+        <ThemePicker />
         <div className="flex gap-2">
           {activeFormIndex > 1 && (
-            <Button
-              size="sm"
-              onClick={() => setActiveFormIndex(activeFormIndex-1)}
-            >
+            <Button size="sm" onClick={() => goToStep(activeFormIndex - 1)}>
               <ArrowLeft />
             </Button>
           )}
-          <Button
-          disabled={!enableNext}
-            className="flex gap-2"
-            size="sm"
-            onClick={() => setActiveFormIndex(activeFormIndex + 1)}
-          >
-            Next <ArrowRight />
-          </Button>
+          {activeFormIndex < stepCount && (
+            <Button
+              disabled={!enableNext}
+              className="flex gap-2"
+              size="sm"
+              onClick={() => goToStep(activeFormIndex + 1)}
+            >
+              Next <ArrowRight />
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* Perosnal Detail*/}
-      {activeFormIndex==1?<PersonalDetailForm enableNext={(v)=>setEnableNext(v)} />:null}
-      {/* Summery */}
-         {activeFormIndex==2?<SummeryDetails enableNext={(v)=>setEnableNext(v)}/>:null}
-      {/* Experience */}
-           {activeFormIndex==3?<ExperienceDetails enableNext={(v)=>setEnableNext(v)}/>:null}
-      {/* Educational Details*/}
-         {activeFormIndex==4?<EducationDetails/>:null}
-      {/* Skills*/}
+      {renderStepForm()}
     </div>
   );
-}4
+}
 
 export default FormSection;

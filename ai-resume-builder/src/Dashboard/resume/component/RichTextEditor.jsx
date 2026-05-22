@@ -24,35 +24,50 @@ import { toast } from "sonner";
 import { AIChatSession } from "../../../../service/AIModal";
 
 const PROMPT = "position title: {positionTitle}, Depends on position title give me 5-7 bullet points for my experience in resume, give me result in HTML format.";
-function RichTextEditor({ onRichTextEditorChange, index }) {
-  const [value, setValue] = useState();
+function RichTextEditor({ onRichTextEditorChange, index,defaultValue }) {
+  const [value, setValue] = useState(defaultValue);
   const { resumeInfo, setResumeInfo } = useContext(ResumeInfoContext);
   const [loading, setLoading] = useState(false);
 
-  const GenerateSummeryFromAI = async () => {
-    setLoading(true);
-    if (!resumeInfo?.experience[index]?.title) {
-      toast("Please Add Position Title");
-      return;
-    }
-    const prompt = PROMPT.replace(
-      "{positionTitle}",
-      resumeInfo?.experience[index]?.title,
-    );
-    const result = await AIChatSession.sendMessage(prompt);
-    // const responseText = await result.response.text();
-    // // onRichTextEditorChange(responseText);
-    // setValue(responseText.replace('[','').replace(']',''));
+const GenerateSummeryFromAI = async () => {
 
-    const responseText = await result.response.text();
+  setLoading(true);
 
-const parsedResponse = JSON.parse(responseText);
+  if (!resumeInfo?.experience[index]?.title) {
 
-setValue(parsedResponse.html);
+    toast("Please Add Position Title");
 
-onRichTextEditorChange(parsedResponse.html);
     setLoading(false);
-  };
+
+    return;
+
+  }
+
+  const prompt = PROMPT.replace(
+    "{positionTitle}",
+    resumeInfo?.experience[index]?.title,
+  );
+
+  const result =
+    await AIChatSession.sendMessage(prompt);
+
+  const responseText =
+    await result.response.text();
+
+  const parsedResponse =
+    JSON.parse(responseText);
+
+  setValue(
+    parsedResponse.html_format
+  );
+
+  onRichTextEditorChange(
+    parsedResponse.html_format
+  );
+
+  setLoading(false);
+
+};
 
   return (
     <div>

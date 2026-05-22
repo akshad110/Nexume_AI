@@ -8,6 +8,9 @@ import Home from './Home/Home'
 import Dashboard from './Dashboard/Dashboard'
 import { ClerkProvider } from '@clerk/react'
 import ResumeEdit from './Dashboard/resume/[resumeid]/edit/ResumeEdit'
+import ResumeView from './Dashboard/resume/[resumeid]/view/ResumeView'
+import AtsChecker from './pages/AtsChecker'
+import GenerateWithAi from './pages/GenerateWithAi'
 
 const router = createBrowserRouter([
   {
@@ -18,9 +21,21 @@ children:[
     path:'/dashboard',
     element:<Dashboard/>
   },
+  {
+    path:'/ats-checker',
+    element:<AtsChecker/>
+  },
+  {
+    path:'/generate-with-ai',
+    element:<GenerateWithAi/>
+  },
 {
   path:'/dashboard/resume/:resumeid/edit',
   element:<ResumeEdit/>
+},
+{
+  path:'/my-resume/:resumeid/view',
+  element:<ResumeView/>
 }
 ]
   },

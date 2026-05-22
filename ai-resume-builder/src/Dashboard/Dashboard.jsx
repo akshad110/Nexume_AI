@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import AddResume from './components/addResume'
+import AddResume from './components/AddResume'
 import GlobalApis from '../../service/GlobalApis'
 import { useUser } from '@clerk/react'
 import ResumeItem from './components/ResumeItem';
@@ -27,7 +27,7 @@ function Dashboard() {
          <AddResume/>
          {
           resumeList.length>0&&resumeList.map((resume,index)=>{
-            return <ResumeItem resume={resume} key={index}/>
+            return <ResumeItem resume={resume} key={index} refreshData={GetUserResumesList}/>
           })
          }
       </div>

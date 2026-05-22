@@ -62,25 +62,13 @@ export default{
         }
     ],
     skills:[
-        {
-            id:1,
-            name:'Angular',
-            rating:80,
-        },
-        {
-            id:1,
-            name:'React',
-            rating:100,
-        },
-        {
-            id:1,
-            name:'MySql',
-            rating:80,
-        },
-        {
-            id:1,
-            name:'React Native',
-            rating:100,
-        }
-    ]
+  {
+    title:"Programming Language",
+    skills:["C","Java","Python"]
+  },
+  {
+    title:"Frontend",
+    skills:["React","Tailwind CSS"]
+  }
+]
 }

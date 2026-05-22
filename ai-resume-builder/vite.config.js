@@ -10,9 +10,13 @@ export default defineConfig({
     tsconfigPaths(),
   ],
 
-  server: {
-  watch: {
-    usePolling: true,
+  optimizeDeps: {
+    include: ["html2canvas", "jspdf"],
   },
-},
-});7
+
+  server: {
+    watch: {
+      usePolling: true,
+    },
+  },
+});
