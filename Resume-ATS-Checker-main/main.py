@@ -135,6 +135,11 @@ app = Flask(__name__)
 CORS(app)
 
 
+@app.route("/", methods=["GET"])
+def health():
+    return jsonify({"status": "ok", "service": "ATS Resume Analyzer"})
+
+
 # PDF/Text Extraction
 def pdf_to_data(pdf_file):
     reader = PdfReader(pdf_file)
