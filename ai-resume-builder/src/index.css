@@ -107,6 +107,26 @@
   padding-left: 2em;
 }
 
+@keyframes tab-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.animate-tab-progress {
+  animation: tab-progress linear forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-tab-progress {
+    animation: none;
+    width: 100%;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

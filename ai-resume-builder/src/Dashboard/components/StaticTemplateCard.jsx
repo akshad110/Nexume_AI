@@ -1,5 +1,4 @@
 import React from 'react'
-import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { TEMPLATE_IDS } from '@/data/resumeTemplates'
 
@@ -12,15 +11,15 @@ function StaticTemplateCard({ template, selected, onSelect }) {
       type="button"
       onClick={onSelect}
       className={cn(
-        'relative w-full rounded-xl border-2 bg-white p-3 text-left transition-all hover:shadow-md',
+        'relative w-full rounded-lg border-2 bg-white p-3 text-left transition-all',
         selected
-          ? 'border-violet-600 ring-2 ring-violet-200'
-          : 'border-gray-200 hover:border-violet-300',
+          ? 'border-gray-900 shadow-md'
+          : 'border-gray-200 hover:border-gray-400',
       )}
     >
       {selected && (
-        <span className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-violet-600 text-white">
-          <Check className="h-3.5 w-3.5" strokeWidth={3} />
+        <span className="absolute right-2 top-2 z-10 text-[10px] font-bold uppercase tracking-wider text-gray-900 bg-gray-100 px-2 py-0.5 rounded">
+          Selected
         </span>
       )}
 

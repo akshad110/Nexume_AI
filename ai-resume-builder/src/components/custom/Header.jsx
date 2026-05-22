@@ -3,6 +3,7 @@ import { Button } from '../ui/button'
 import React from 'react'
 import { UserButton, useUser } from '@clerk/react'
 import { cn } from '@/lib/utils'
+import BrandLogo from '@/components/brand/BrandLogo'
 
 const NAV_LINKS = [
   { label: 'Home', path: '/', end: true },
@@ -16,10 +17,8 @@ function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/80">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-6 px-5">
-        <Link to="/" className="shrink-0">
-          <img src="/logo.svg" width={30} height={30} alt="Logo" />
-        </Link>
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-5">
+        <BrandLogo size="sm" linkTo="/" />
 
         <nav className="hidden flex-1 items-center justify-center gap-8 md:flex">
           {NAV_LINKS.map((link) => (
@@ -52,7 +51,6 @@ function Header() {
         </div>
       </div>
 
-      {/* Mobile nav */}
       <nav className="flex items-center justify-center gap-5 overflow-x-auto border-t px-4 py-2 md:hidden">
         {NAV_LINKS.map((link) => (
           <NavLink

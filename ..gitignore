@@ -10,6 +10,10 @@ __pycache__/
 
 # Env files
 .env
+.env.local
+.env.*.local
+**/.env
+Resume-ATS-Checker-main/.env
 
 # VS Code
 .vscode/

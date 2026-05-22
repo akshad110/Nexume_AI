@@ -1,4 +1,4 @@
-import { Download, Eye, Loader2, MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
@@ -6,7 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,9 +16,25 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 import GlobalApis from '../../../service/GlobalApis'
+import { getTemplateMeta } from '@/data/resumeTemplates'
+import ResumeDocMock from './ResumeDocMock'
+import { cn } from '@/lib/utils'
+
+function formatResumeDate(iso) {
+  if (!iso) return null
+  try {
+    return new Date(iso).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  } catch {
+    return null
+  }
+}
 
 function ResumeCardItem({ resume, refreshData }) {
   const navigation = useNavigate()
@@ -26,11 +42,15 @@ function ResumeCardItem({ resume, refreshData }) {
   const [loading, setLoading] = useState(false)
   const [downloading, setDownloading] = useState(false)
 
+  const template = getTemplateMeta(resume?.templateId)
+  const accent = resume?.themeColor || template.previewAccent || '#171717'
+  const edited = formatResumeDate(resume?.updatedAt)
+
   const onDelete = () => {
     setLoading(true)
     GlobalApis.DeleteResumeById(resume.documentId)
       .then(() => {
-        toast.success('Resume deleted!')
+        toast.success('Resume deleted')
         refreshData?.()
         setOpenAlert(false)
       })
@@ -48,80 +68,91 @@ function ResumeCardItem({ resume, refreshData }) {
 
   return (
     <>
-      <div className='rounded-lg shadow-lg overflow-hidden bg-black'>
-        <Link to={'/dashboard/resume/' + resume.documentId + "/edit"}>
-          <div
-            className='p-14 bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 h-[230px] flex items-center justify-center'
-            style={{ borderColor: resume?.themeColor }}
-          >
-            <img src="/cv.png" width={80} height={80} alt="Resume" />
-          </div>
+      <article
+        className={cn(
+          'group flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden',
+          'transition-all duration-200 hover:border-gray-400 hover:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.15)]',
+        )}
+      >
+        <Link
+          to={'/dashboard/resume/' + resume.documentId + '/edit'}
+          className="block flex-1 bg-[#ececee] hover:bg-[#e4e4e7] transition-colors"
+        >
+          <ResumeDocMock
+            accent={accent}
+            label={template.name.split(' ')[0]}
+          />
         </Link>
 
-        <div
-          className='p-3 flex items-center justify-between text-white'
-          style={{ background: resume?.themeColor }}
-        >
-          <h2 className='text-sm font-medium truncate'>
-            {resume.title}
-          </h2>
+        <footer className="border-t border-gray-100 px-4 py-3.5">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <h2 className="text-sm font-bold text-gray-900 truncate leading-tight">
+                {resume.title}
+              </h2>
+              <p className="text-[11px] text-gray-500 mt-1 font-medium">
+                {template.name}
+                {edited ? ` · Edited ${edited}` : ''}
+              </p>
+            </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button type="button" aria-label="Resume options">
-                <MoreVertical className='h-4 w-4 cursor-pointer' />
-              </button>
-            </DropdownMenuTrigger>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Resume options"
+                  className="shrink-0 w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 font-bold tracking-widest text-sm leading-none"
+                >
+                  ···
+                </button>
+              </DropdownMenuTrigger>
 
-            <DropdownMenuContent>
-              <DropdownMenuItem
-                onClick={() =>
-                  navigation('/dashboard/resume/' + resume.documentId + "/edit")
-                }
-              >
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuItem
+                  onClick={() =>
+                    navigation(
+                      '/dashboard/resume/' + resume.documentId + '/edit',
+                    )
+                  }
+                >
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    navigation('/my-resume/' + resume.documentId + '/view')
+                  }
+                >
+                  Preview
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onDownload} disabled={downloading}>
+                  {downloading ? 'Opening…' : 'Download PDF'}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setOpenAlert(true)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-              <DropdownMenuItem
-                onClick={() =>
-                  navigation('/my-resume/' + resume.documentId + '/view')
-                }
-              >
-                <Eye className="mr-2 h-4 w-4" />
-                View Resume
-              </DropdownMenuItem>
-
-              <DropdownMenuItem
-                onClick={onDownload}
-                disabled={downloading}
-              >
-                {downloading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="mr-2 h-4 w-4" />
-                )}
-                Download Resume
-              </DropdownMenuItem>
-
-              <DropdownMenuItem
-                onClick={() => setOpenAlert(true)}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+          <Link
+            to={'/dashboard/resume/' + resume.documentId + '/edit'}
+            className="mt-3 inline-block text-xs font-semibold text-gray-900 underline underline-offset-2 decoration-gray-300 group-hover:decoration-gray-900"
+          >
+            Continue editing
+          </Link>
+        </footer>
+      </article>
 
       <AlertDialog open={openAlert} onOpenChange={setOpenAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete resume?</AlertDialogTitle>
+            <AlertDialogTitle>Delete this resume?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete &quot;{resume.title}&quot;. This action cannot be undone.
+              &quot;{resume.title}&quot; will be removed permanently. This
+              can&apos;t be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -134,7 +165,7 @@ function ResumeCardItem({ resume, refreshData }) {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
+                  Deleting…
                 </>
               ) : (
                 'Delete'

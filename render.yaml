@@ -1,4 +1,48 @@
+# Optional Blueprint — deploy all services from repo root
+# Dashboard: New + → Blueprint → connect repo
+
+databases:
+  - name: nexume-strapi-db
+    plan: free
+    databaseName: strapi
+    user: strapi
+
 services:
+  - type: web
+    name: nexume-strapi-api
+    runtime: node
+    rootDir: backend/ai-resume-admin
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    plan: free
+    envVars:
+      - key: NODE_VERSION
+        value: "20.18.0"
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_CLIENT
+        value: postgres
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nexume-strapi-db
+          property: connectionString
+      - key: DATABASE_SSL
+        value: "true"
+      - key: APP_KEYS
+        generateValue: true
+      - key: API_TOKEN_SALT
+        generateValue: true
+      - key: ADMIN_JWT_SECRET
+        generateValue: true
+      - key: TRANSFER_TOKEN_SALT
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+
   - type: web
     name: nexume-ats-api
     runtime: python
@@ -10,3 +54,19 @@ services:
         value: "3.12.3"
       - key: GEMINI_API_KEY
         sync: false
+
+  - type: web
+    name: nexume-ai-app
+    runtime: static
+    rootDir: ai-resume-builder
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: VITE_STRAPI_API_URL
+        sync: false
+      - key: VITE_STRAPI_API_KEY
+        sync: false
+      - key: VITE_ATS_API_URL
+        value: https://nexume-ats-api.onrender.com
