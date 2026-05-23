@@ -1,5 +1,5 @@
 import React from 'react'
-import { proName, proRow } from '@/lib/resumeExportStyles'
+import { PROFESSIONAL_FONT, proName, proRow } from '@/lib/resumeExportStyles'
 
 function ProfessionalHeader({ resumeInfo, themeColor }) {
   const fullName = [resumeInfo?.firstName, resumeInfo?.lastName]
@@ -9,7 +9,13 @@ function ProfessionalHeader({ resumeInfo, themeColor }) {
   return (
     <div style={{ marginBottom: '12px' }}>
       {resumeInfo?.address && (
-        <p style={{ fontSize: '10px', margin: '0 0 6px 0', lineHeight: 1.4 }}>
+        <p
+          style={{
+            fontSize: PROFESSIONAL_FONT.body,
+            margin: '0 0 6px 0',
+            lineHeight: 1.4,
+          }}
+        >
           {resumeInfo.address}
         </p>
       )}
@@ -24,7 +30,7 @@ function ProfessionalHeader({ resumeInfo, themeColor }) {
                   : `https://${resumeInfo.website}`
               }
               style={{
-                fontSize: '10px',
+                fontSize: PROFESSIONAL_FONT.body,
                 color: themeColor,
                 textDecoration: 'underline',
                 display: 'block',
@@ -40,7 +46,7 @@ function ProfessionalHeader({ resumeInfo, themeColor }) {
         <div
           style={{
             textAlign: 'right',
-            fontSize: '10px',
+            fontSize: PROFESSIONAL_FONT.body,
             flexShrink: 0,
             lineHeight: 1.4,
           }}

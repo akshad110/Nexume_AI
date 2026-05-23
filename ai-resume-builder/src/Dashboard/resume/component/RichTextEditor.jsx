@@ -34,6 +34,8 @@ function RichTextEditor({
   index,
   defaultValue,
   positionTitle,
+  label = "Work summary",
+  enableAi = true,
 }) {
   const [value, setValue] = useState(defaultValue ?? "");
   const [loading, setLoading] = useState(false);
@@ -89,24 +91,26 @@ function RichTextEditor({
   return (
     <div>
       <div className="flex justify-between my-2">
-        <label className="text-xs">Work summary</label>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="flex gap-2 border-primary text-primary"
-          onClick={generateExperienceFromAI}
-          disabled={loading}
-        >
-          {loading ? (
-            <LoaderCircle className="h-4 w-4 animate-spin" />
-          ) : (
-            <>
-              <Brain className="h-4 w-4" />
-              Generate with AI
-            </>
-          )}
-        </Button>
+        <label className="text-xs">{label}</label>
+        {enableAi && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="flex gap-2 border-primary text-primary"
+            onClick={generateExperienceFromAI}
+            disabled={loading}
+          >
+            {loading ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <Brain className="h-4 w-4" />
+                Generate with AI
+              </>
+            )}
+          </Button>
+        )}
       </div>
       <EditorProvider>
         <Editor

@@ -1,4 +1,5 @@
 import React from 'react'
+import { MODERN_FONT } from '@/lib/resumeExportStyles'
 
 function ModernProjects({ resumeInfo }) {
   const projects = (resumeInfo?.projects ?? []).filter(
@@ -10,17 +11,28 @@ function ModernProjects({ resumeInfo }) {
   return (
     <div className="space-y-3">
       {projects.map((project, index) => (
-        <div key={index} className="text-[10px] leading-relaxed">
+        <div
+          key={index}
+          className="leading-relaxed"
+          style={{ fontSize: MODERN_FONT.body }}
+        >
           <p className="font-bold m-0" style={{ color: accent }}>
             {project.name}
           </p>
           {project.techUsed && (
-            <p className="text-[9px] text-gray-600 m-0 mt-0.5">
+            <p
+              className="text-gray-600 m-0 mt-0.5"
+              style={{ fontSize: MODERN_FONT.small }}
+            >
               {project.techUsed}
             </p>
           )}
           {project.description && (
-            <p className="mt-1 mb-0 text-gray-800">{project.description}</p>
+            <div
+              className="mt-1 mb-0 text-gray-800 pro-exp-html [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4"
+              style={{ fontSize: MODERN_FONT.body }}
+              dangerouslySetInnerHTML={{ __html: project.description }}
+            />
           )}
         </div>
       ))}

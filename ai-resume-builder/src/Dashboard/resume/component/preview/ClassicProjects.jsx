@@ -28,14 +28,10 @@ function ClassicProjects({ resumeInfo }) {
             </p>
           )}
           {project.description && (
-            <ul className="list-disc ml-4 mt-1 space-y-0.5">
-              {project.description
-                .split(/(?<=[.!?])\s+/)
-                .filter(Boolean)
-                .map((line, i) => (
-                  <li key={i}>{line.trim()}</li>
-                ))}
-            </ul>
+            <div
+              className="text-[10px] mt-1 pro-exp-html [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4"
+              dangerouslySetInnerHTML={{ __html: project.description }}
+            />
           )}
         </div>
       ))}

@@ -1,12 +1,13 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { ResumeInfoContext } from '@/context/ResumeContext'
+import { stripHtml } from '@/lib/resumeToPlainText'
 import { LoaderCircle } from 'lucide-react'
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import GlobalApis from '../../../../../service/GlobalApis'
 import { toast } from 'sonner'
+import RichTextEditor from '../RichTextEditor'
 
 const emptyProject = { name: '', techUsed: '', description: '' }
 
@@ -44,6 +45,13 @@ function ProjectsDetails() {
     syncPreview(newEntries)
   }
 
+  const handleRichTextEditor = (html, index) => {
+    const newEntries = projectsList.slice()
+    newEntries[index].description = html
+    setProjectsList(newEntries)
+    syncPreview(newEntries)
+  }
+
   const addProject = () => {
     const next = [...projectsList, { ...emptyProject }]
     setProjectsList(next)
@@ -59,7 +67,7 @@ function ProjectsDetails() {
 
   const onSave = () => {
     const invalid = projectsList.some(
-      (p) => !p.name?.trim() || !p.description?.trim(),
+      (p) => !p.name?.trim() || !stripHtml(p.description),
     )
     if (invalid) {
       toast.error('Each project needs a name and description')
@@ -110,13 +118,14 @@ function ProjectsDetails() {
               />
             </div>
             <div>
-              <label className="text-xs">Description</label>
-              <Textarea
-                name="description"
-                required
-                value={item.description ?? ''}
-                placeholder="Open source python library for financial data analysis..."
-                onChange={(e) => handleEvent(e, index)}
+              <RichTextEditor
+                index={index}
+                label="Description"
+                enableAi={false}
+                defaultValue={item.description}
+                onRichTextEditorChange={(html) =>
+                  handleRichTextEditor(html, index)
+                }
               />
             </div>
           </div>

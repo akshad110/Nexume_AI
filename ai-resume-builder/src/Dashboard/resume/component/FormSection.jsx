@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { resumeToPlainText, resumeToTextFile } from "@/lib/resumeToPlainText";
-import { Loader2 } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import PersonalDetailForm from "./forms/PersonalDetailForm";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,12 +10,13 @@ import ExperienceDetails from "./forms/ExperienceDetails";
 import EducationDetails from "./forms/EducationDetails";
 import SkillsDetails from "./forms/SkillsDetails";
 import ProjectsDetails from "./forms/ProjectsDetails";
+import CustomSectionsDetails from "./forms/CustomSectionsDetails";
 import ThemePicker from "./ThemePicker";
 import { ResumeInfoContext } from "@/context/ResumeContext";
 import { getStepCount, getStepKey, getStepLabel, getTemplateMeta } from "@/data/resumeTemplates";
 import { parseFormStep, canEnableNextForStep } from "@/lib/resumeFormSteps";
 
-function FormSection() {
+function FormSection({ onDownload, downloading = false }) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { resumeInfo } = useContext(ResumeInfoContext);
@@ -56,6 +57,8 @@ function FormSection() {
         return <SkillsDetails />;
       case "projects":
         return <ProjectsDetails />;
+      case "customSections":
+        return <CustomSectionsDetails />;
       default:
         return <PersonalDetailForm enableNext={(v) => setEnableNext(v)} />;
     }
@@ -77,6 +80,23 @@ function FormSection() {
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <ThemePicker />
         <div className="flex gap-2 flex-wrap">
+          {onDownload && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              disabled={downloading}
+              onClick={onDownload}
+            >
+              {downloading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              Download PDF
+            </Button>
+          )}
           <Button
             type="button"
             variant="outline"

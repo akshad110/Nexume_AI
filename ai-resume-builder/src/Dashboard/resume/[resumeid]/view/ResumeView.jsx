@@ -53,7 +53,7 @@ function ResumeView() {
     try {
       const fileName = getSafeFileName(resumeInfo?.title)
       await downloadResumePdf(resumeInfo, fileName)
-      toast.success('Resume downloaded (ATS-friendly PDF)')
+      toast.success('Resume downloaded')
       if (redirectAfter) {
         navigate('/dashboard', { replace: true })
       }
@@ -63,12 +63,12 @@ function ResumeView() {
     } finally {
       setDownloading(false)
     }
-  }, [resumeInfo?.title, navigate])
+  }, [resumeInfo, navigate])
 
   useEffect(() => {
     if (!loading && resumeInfo && autoDownload && !autoDownloadDone.current) {
       autoDownloadDone.current = true
-      const timer = setTimeout(() => handleDownload(true), 400)
+      const timer = setTimeout(() => handleDownload(true), 1500)
       return () => clearTimeout(timer)
     }
   }, [loading, resumeInfo, autoDownload, handleDownload])
@@ -122,7 +122,10 @@ function ResumeView() {
           {resumeInfo?.title || 'Resume Preview'}
         </h1>
 
-        <div ref={previewRef} className="flex justify-center overflow-x-auto">
+        <div
+          ref={previewRef}
+          className="flex justify-center overflow-x-hidden"
+        >
           <ResumePreview forExport />
         </div>
       </div>

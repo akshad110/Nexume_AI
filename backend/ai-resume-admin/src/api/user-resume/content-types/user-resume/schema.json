@@ -72,6 +72,12 @@
     },
     "programmingSkills": {
       "type": "json"
+    },
+    "customSections": {
+      "type": "json"
+    },
+    "sectionVisibility": {
+      "type": "json"
     }
   }
 }

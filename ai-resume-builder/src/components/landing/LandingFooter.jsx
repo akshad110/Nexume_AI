@@ -140,26 +140,6 @@ function LandingFooter() {
               ))}
             </nav>
           </ScrollReveal>
-
-          <ScrollReveal delay={260} className="lg:col-span-2">
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-5">
-              Status
-            </p>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                </span>
-                <span className="text-xs font-semibold text-emerald-400">
-                  All systems operational
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 leading-relaxed">
-                ATS API hosted on Render. Scans may take a moment on first request.
-              </p>
-            </div>
-          </ScrollReveal>
         </div>
 
         {/* Bottom bar */}

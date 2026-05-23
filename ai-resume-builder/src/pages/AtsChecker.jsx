@@ -21,7 +21,7 @@ const MAX_FILE_MB = 10
 
 const TIPS = [
   { title: 'Paste the full job ad', desc: 'Include requirements & nice-to-haves' },
-  { title: 'Use our PDF download', desc: 'Text-based PDFs work in ATS tools (not image-only)' },
+  { title: 'Use Check ATS in editor', desc: 'Best results — or upload a freshly downloaded PDF' },
   { title: 'Under a minute', desc: 'First run may take longer on cold start' },
 ]
 
@@ -134,7 +134,7 @@ function AtsChecker() {
 
       if (!textPayload) {
         toast.error(
-          'Could not read your resume. Re-download from Nexume or use Check ATS from the resume editor.',
+          'Could not read text from this PDF. Use Check ATS score from the resume editor, or re-download your resume and try again.',
         )
         setLoading(false)
         setLoadingProgress(0)
@@ -400,28 +400,15 @@ function AtsChecker() {
                 </ScrollReveal>
               )}
 
-              {parsed.sections.length > 0 ? (
-                <div className="space-y-4">
-                  {parsed.sections.map((section, i) => (
-                    <AtsResultSection
-                      key={section.key}
-                      section={section}
-                      index={i}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <ScrollReveal>
-                  <article className="rounded-[1.75rem] border border-gray-200 bg-white p-6 md:p-8 shadow-sm">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">
-                      Full report
-                    </h3>
-                    <p className="text-[15px] text-gray-600 leading-[1.65] whitespace-pre-wrap">
-                      {parsed.raw}
-                    </p>
-                  </article>
-                </ScrollReveal>
-              )}
+              <div className="space-y-4">
+                {parsed.sections.map((section, i) => (
+                  <AtsResultSection
+                    key={`${section.key}-${i}`}
+                    section={section}
+                    index={i}
+                  />
+                ))}
+              </div>
 
               <p className="text-xs text-gray-400 text-center py-4">
                 Suggestions only — always review before applying.

@@ -83,7 +83,7 @@ function AddResume() {
         onOpenChange={(open) => (open ? setOpenDialog(true) : resetDialog())}
       >
         <DialogContent
-          className="!max-w-4xl w-[min(96vw,56rem)] max-h-[90vh] overflow-y-auto p-0 gap-0"
+          className="!max-w-4xl w-[min(96vw,56rem)] max-h-[90vh] overflow-x-hidden overflow-y-auto p-0 gap-0"
           showCloseButton={true}
         >
           <div className="px-6 pt-6 pb-4 border-b border-gray-100">
@@ -98,7 +98,7 @@ function AddResume() {
             </p>
           </div>
 
-          <div className="px-6 py-5 space-y-6">
+          <div className="min-w-0 px-6 py-5 space-y-6 overflow-x-hidden">
             <div>
               <label
                 htmlFor="resume-title"
@@ -117,7 +117,7 @@ function AddResume() {
 
             <div>
               <p className="text-sm font-bold text-gray-900 mb-3">Layout</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid min-w-0 grid-cols-1 md:grid-cols-3 gap-4">
                 {RESUME_TEMPLATES.map((template) => (
                   <StaticTemplateCard
                     key={template.id}
@@ -130,7 +130,7 @@ function AddResume() {
             </div>
           </div>
 
-          <DialogFooter className="px-6 py-4 border-t border-gray-100 bg-gray-50/80 flex gap-3 justify-end sm:justify-end">
+          <DialogFooter className="!mx-0 !mb-0 px-6 py-4 border-t border-gray-100 bg-gray-50/80 flex gap-3 justify-end sm:justify-end">
             <Button type="button" variant="ghost" onClick={resetDialog}>
               Cancel
             </Button>

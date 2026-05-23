@@ -24,10 +24,9 @@ function ExperienceDetails() {
   const params = useParams();
 
   const [loading, setLoading] = useState(false);
+  const showOnResume = resumeInfo?.sectionVisibility?.experience !== false;
 
-   
-
-const [experienceList, setExperienceList] = useState([{ ...formField }]);
+  const [experienceList, setExperienceList] = useState([{ ...formField }]);
   const initializedFor = useRef(null);
 
   useEffect(() => {
@@ -43,12 +42,24 @@ const [experienceList, setExperienceList] = useState([{ ...formField }]);
     setResumeInfo((prev) => ({ ...prev, experience: list }));
   };
 
+  const setShowOnResume = (checked) => {
+    const sectionVisibility = {
+      ...(resumeInfo?.sectionVisibility || {}),
+      experience: checked,
+    };
+    setResumeInfo((prev) => ({ ...prev, sectionVisibility }));
+  };
+
   const onSave = () => {
     setLoading(true);
 
     const data = {
       data: {
         experience: experienceList,
+        sectionVisibility: {
+          ...(resumeInfo?.sectionVisibility || {}),
+          experience: showOnResume,
+        },
       },
     };
 
@@ -106,7 +117,17 @@ const [experienceList, setExperienceList] = useState([{ ...formField }]);
       <div className="p-5 shadow-lg rounded-lg border-t-primary border-t-4 mt-10">
         <h2 className="font-bold text-lg">Professional Experience</h2>
 
-        <p>Add your past Job Experience</p>
+        <p>Add your past job experience. Turn off the option below if you are a fresher and want to hide this section on your resume.</p>
+
+        <label className="flex items-center gap-2 mt-4 mb-2 cursor-pointer text-sm">
+          <input
+            type="checkbox"
+            className="h-4 w-4 rounded border-gray-300"
+            checked={showOnResume}
+            onChange={(e) => setShowOnResume(e.target.checked)}
+          />
+          <span>Show experience section on resume</span>
+        </label>
 
         <div>
           {experienceList.map((item, index) => (

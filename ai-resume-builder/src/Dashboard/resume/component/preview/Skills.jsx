@@ -1,4 +1,5 @@
 import React from 'react'
+import { classicHrStyle } from '@/lib/resumeDividerStyles'
 
 function Skills({ resumeInfo }) {
 
@@ -16,10 +17,8 @@ function Skills({ resumeInfo }) {
       </h2>
 
       <hr
-        className='border-[1.5px] my-2'
-        style={{
-          borderColor: resumeInfo?.themeColor
-        }}
+        data-resume-hr
+        style={classicHrStyle(resumeInfo?.themeColor)}
       />
 
       <div className='space-y-2 my-4'>

@@ -11,7 +11,7 @@ function StaticTemplateCard({ template, selected, onSelect }) {
       type="button"
       onClick={onSelect}
       className={cn(
-        'relative w-full rounded-lg border-2 bg-white p-3 text-left transition-all',
+        'relative min-w-0 w-full rounded-lg border-2 bg-white p-3 text-left transition-all',
         selected
           ? 'border-gray-900 shadow-md'
           : 'border-gray-200 hover:border-gray-400',
@@ -24,7 +24,7 @@ function StaticTemplateCard({ template, selected, onSelect }) {
       )}
 
       <div
-        className="h-48 w-full overflow-hidden rounded-lg border border-gray-200 bg-white p-2.5 text-black"
+        className="h-48 w-full overflow-hidden rounded-lg border border-gray-200 bg-white p-2.5 text-black break-words"
         style={{
           fontFamily: isProfessional
             ? 'Georgia, "Times New Roman", serif'
@@ -116,7 +116,9 @@ function StaticTemplateCard({ template, selected, onSelect }) {
       </div>
 
       <p className="mt-2 text-sm font-semibold text-gray-900">{template.name}</p>
-      <p className="text-xs text-gray-500 leading-snug">{template.description}</p>
+      <p className="text-xs text-gray-500 leading-snug break-words">
+        {template.description}
+      </p>
     </button>
   )
 }

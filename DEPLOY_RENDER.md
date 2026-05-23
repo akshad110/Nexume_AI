@@ -58,6 +58,7 @@ PORT=10000
 DATABASE_CLIENT=postgres
 DATABASE_URL=<paste Internal Database URL from Step A>
 DATABASE_SSL=true
+DATABASE_SSL_REJECT_UNAUTHORIZED=false
 
 APP_KEYS=<4 random strings, comma-separated>
 API_TOKEN_SALT=<random>
@@ -149,6 +150,7 @@ VITE_GOOGLE_AI_API_KEY=<optional>
 | Issue | Fix |
 |-------|-----|
 | `ECONNREFUSED 127.0.0.1:3306` on Render | You copied **local MySQL** env to Render. Delete `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`. Set `DATABASE_CLIENT=postgres`, `DATABASE_URL` (Render Postgres **Internal** URL), `DATABASE_SSL=true`. Redeploy. |
+| `self-signed certificate` on Render Postgres | Add `DATABASE_SSL_REJECT_UNAUTHORIZED=false` (keep `DATABASE_SSL=true`). Redeploy. |
 | `No open ports detected` | Strapi crashed before starting (usually DB error above). Fix DB env first; ensure `HOST=0.0.0.0` and do not hardcode `PORT=1337` on Render (Render sets `PORT` automatically). |
 | Strapi build fails on free tier | Use Starter plan or reduce memory; ensure Node 20+ |
 | CORS error in browser | Add exact frontend URL to `CORS_ORIGINS`, redeploy Strapi |

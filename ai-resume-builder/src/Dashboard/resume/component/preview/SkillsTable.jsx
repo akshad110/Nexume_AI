@@ -1,7 +1,7 @@
 import React from 'react'
 
 /** Two-column skills layout (template2 / template3 LaTeX tabular style) */
-function SkillsTable({ skills, themeColor = '#171717' }) {
+function SkillsTable({ skills, themeColor = '#171717', fontSize = '10px' }) {
   const rows = (skills ?? []).filter(
     (item) => item?.title || (item?.skills && item.skills.length),
   )
@@ -12,7 +12,7 @@ function SkillsTable({ skills, themeColor = '#171717' }) {
       style={{
         width: '100%',
         borderCollapse: 'collapse',
-        fontSize: '10px',
+        fontSize,
         lineHeight: 1.45,
       }}
     >

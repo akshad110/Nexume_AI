@@ -34,6 +34,7 @@ const FORM_STEPS_BY_TEMPLATE = {
     'projects',
     'education',
     'skills',
+    'customSections',
   ],
   [TEMPLATE_IDS.PROFESSIONAL]: [
     'personal',
@@ -41,6 +42,7 @@ const FORM_STEPS_BY_TEMPLATE = {
     'experience',
     'projects',
     'skills',
+    'customSections',
   ],
   [TEMPLATE_IDS.MODERN]: [
     'personal',
@@ -49,6 +51,7 @@ const FORM_STEPS_BY_TEMPLATE = {
     'projects',
     'education',
     'skills',
+    'customSections',
   ],
 }
 
@@ -96,6 +99,7 @@ export const STEP_LABELS = {
   projects: 'Projects',
   education: 'Education',
   skills: 'Skills',
+  customSections: 'Custom Sections',
 }
 
 export function getStepLabel(stepKey) {

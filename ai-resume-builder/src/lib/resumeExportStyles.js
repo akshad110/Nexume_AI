@@ -5,10 +5,17 @@ export const RESUME_EXPORT_CSS = `
     color: #000000;
   }
   .resume-export {
-    font-family: Georgia, "Times New Roman", Times, serif;
     font-size: 11px;
     line-height: 1.35;
     background: #ffffff;
+  }
+  .resume-export h1,
+  .resume-export h2,
+  .resume-export h3,
+  .resume-export p,
+  .resume-export li,
+  .resume-export span {
+    color: #000000;
   }
   .resume-export ul {
     list-style: none;
@@ -37,6 +44,24 @@ export const RESUME_EXPORT_CSS = `
   }
 `
 
+/** Template 2 (Professional) — slightly larger than default export scale */
+export const PROFESSIONAL_FONT = {
+  base: '12px',
+  body: '11px',
+  small: '10px',
+  name: '24px',
+  section: '12px',
+}
+
+/** Template 3 (Modern) — matches professional scale */
+export const MODERN_FONT = {
+  base: '12px',
+  body: '11px',
+  small: '10px',
+  name: '26px',
+  section: '14px',
+}
+
 export const proRow = {
   display: 'flex',
   justifyContent: 'space-between',
@@ -46,7 +71,7 @@ export const proRow = {
 }
 
 export const proSectionTitle = (color = '#000000') => ({
-  fontSize: '11px',
+  fontSize: PROFESSIONAL_FONT.section,
   fontWeight: '700',
   textTransform: 'uppercase',
   letterSpacing: '0.08em',
@@ -57,7 +82,7 @@ export const proSectionTitle = (color = '#000000') => ({
 })
 
 export const proName = (color = '#000000') => ({
-  fontSize: '22px',
+  fontSize: PROFESSIONAL_FONT.name,
   fontWeight: '700',
   lineHeight: 1.2,
   margin: 0,

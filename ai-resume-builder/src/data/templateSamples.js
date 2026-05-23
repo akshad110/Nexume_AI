@@ -189,6 +189,8 @@ export function getInitialResumeData(templateId, { title, resumeid, userEmail, u
     projects: [],
     skills: [],
     programmingSkills: { languages: '', technologies: '' },
+    customSections: [],
+    sectionVisibility: { experience: true },
   }
 
   if (templateId === TEMPLATE_IDS.PROFESSIONAL) {

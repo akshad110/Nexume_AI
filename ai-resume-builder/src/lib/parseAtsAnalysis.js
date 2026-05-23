@@ -3,19 +3,29 @@ const SECTION_PATTERNS = [
     key: 'missing',
     title: 'Missing Keywords & Skills',
     icon: 'keywords',
-    match: /missing\s*keywords?\s*\/?\s*skills?/i,
+    patterns: [
+      /missing\s*keywords?\s*\/?\s*skills?/i,
+      /missing\s*keywords?/i,
+      /missing\s*skills?/i,
+      /keywords?\s*(?:and|&)\s*skills?\s*(?:gap|missing)?/i,
+    ],
   },
   {
     key: 'alignment',
     title: 'Role Alignment',
     icon: 'alignment',
-    match: /role\s*alignment/i,
+    patterns: [/role\s*alignment/i, /alignment\s*with\s*(?:the\s*)?role/i],
   },
   {
     key: 'suggestions',
     title: 'Improvement Suggestions',
     icon: 'suggestions',
-    match: /suggestions?\s*(?:for\s*improvement)?/i,
+    patterns: [
+      /suggestions?\s*for\s*improvement/i,
+      /improvement\s*suggestions?/i,
+      /suggestions?/i,
+      /recommendations?/i,
+    ],
   },
 ]
 
@@ -35,37 +45,99 @@ export function cleanMarkdownText(text) {
     .trim()
 }
 
+function normalizeHeaderLine(line) {
+  return cleanMarkdownText(line)
+    .replace(/^#{1,6}\s+/, '')
+    .replace(/^\d+[.)]\s+/, '')
+    .trim()
+}
+
 function extractScore(text) {
   const patterns = [
-    /match\s*score\s*[:(]\s*(\d{1,3})/i,
-    /ats\s*score\s*[:(]\s*(\d{1,3})/i,
-    /score\s*[:(]\s*(\d{1,3})\s*(?:\/\s*100|%)?/i,
+    /match\s*score[^0-9]{0,24}(\d{1,3})\s*(?:\/\s*100|%)/i,
+    /ats\s*score[^0-9]{0,24}(\d{1,3})\s*(?:\/\s*100|%)/i,
     /(\d{1,3})\s*\/\s*100/,
     /(\d{1,3})\s*%\s*match/i,
+    /match\s*score[^0-9]{0,12}(\d{1,3})\b/i,
+    /score[^0-9]{0,12}(\d{1,3})\s*(?:\/\s*100|%)/i,
   ]
 
   for (const pattern of patterns) {
     const match = text.match(pattern)
     if (match) {
       const value = Number.parseInt(match[1], 10)
-      if (value >= 0 && value <= 100) return value
+      if (value >= 1 && value <= 100) return value
     }
   }
   return null
 }
 
 function matchSectionKey(headerText) {
-  const h = cleanMarkdownText(headerText).toLowerCase()
-  if (/match\s*score/i.test(h)) return null
-  const found = SECTION_PATTERNS.find((s) => s.match.test(h))
-  return found?.key ?? null
+  const h = normalizeHeaderLine(headerText).toLowerCase()
+  if (!h || /match\s*score/i.test(h) || /^overall\b/i.test(h)) return null
+
+  for (const config of SECTION_PATTERNS) {
+    if (config.patterns.some((pattern) => pattern.test(h))) {
+      return config.key
+    }
+  }
+  return null
 }
 
-/** Split API text into main sections (no duplicates) */
-function splitMainSections(text) {
+function extractBodyAfterHeader(headerLine, followingLines) {
+  const parts = []
+  const colonIdx = headerLine.indexOf(':')
+  if (colonIdx !== -1) {
+    const inline = headerLine.slice(colonIdx + 1).trim()
+    if (inline) parts.push(inline)
+  }
+  if (followingLines.length) {
+    parts.push(followingLines.join('\n'))
+  }
+  return parts.join('\n').trim()
+}
+
+/** Line-by-line scan — works with Gemini markdown & numbered lists */
+function splitMainSectionsByLines(text) {
+  const lines = text.replace(/\r\n/g, '\n').split('\n')
+  const markers = []
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim()
+    if (!line) continue
+
+    const key = matchSectionKey(line)
+    if (key && !markers.some((m) => m.key === key)) {
+      markers.push({ key, lineIndex: i, headerLine: line })
+    }
+  }
+
+  const byKey = new Map()
+
+  markers.forEach((marker, index) => {
+    const endLine = markers[index + 1]?.lineIndex ?? lines.length
+    const following = lines.slice(marker.lineIndex + 1, endLine)
+    const body = extractBodyAfterHeader(marker.headerLine, following)
+
+    if (!body) return
+
+    const config = SECTION_PATTERNS.find((s) => s.key === marker.key)
+    byKey.set(marker.key, {
+      key: marker.key,
+      title: config.title,
+      icon: config.icon,
+      blocks: parseSectionBlocks(body),
+    })
+  })
+
+  return SECTION_PATTERNS.map((s) => byKey.get(s.key)).filter(Boolean)
+}
+
+/** Regex chunk split — backup when headers share a paragraph */
+function splitMainSectionsByRegex(text) {
   const normalized = text.replace(/\r\n/g, '\n')
   const chunks = normalized.split(
-    /(?=\n\s*(?:(?:#{1,3}\s*)?(?:\d+[.)]\s+)?(?:Match\s*Score|Missing\s*Keywords|Role\s*Alignment|Suggestions?\s*(?:for\s*Improvement)?)[^\n]*))/i,
+    /(?=(?:^|\n)\s*(?:(?:#{1,3}\s*)?(?:\d+[.)]\s+)?(?:\*\*)?\s*(?:Missing\s*Keywords|Role\s*Alignment|Suggestions?\s*(?:for\s*Improvement)?)[^\n]*))/im,
   )
 
   const byKey = new Map()
@@ -74,16 +146,14 @@ function splitMainSections(text) {
     const trimmed = chunk.trim()
     if (!trimmed) return
 
-    const headerMatch = trimmed.match(
-      /^(?:(?:#{1,3}\s*)?(?:\d+[.)]\s+)?)?([^\n:]+):?\s*\n?([\s\S]*)$/i,
-    )
-    if (!headerMatch) return
+    const lines = trimmed.split('\n')
+    const firstLine = lines[0]?.trim() || ''
+    const key = matchSectionKey(firstLine)
+    if (!key) return
 
-    const header = headerMatch[1].trim()
-    const body = headerMatch[2]?.trim() || ''
-    const key = matchSectionKey(header)
+    const body = extractBodyAfterHeader(firstLine, lines.slice(1))
+    if (!body) return
 
-    if (!key || !body) return
     if (!byKey.has(key)) {
       const config = SECTION_PATTERNS.find((s) => s.key === key)
       byKey.set(key, {
@@ -96,6 +166,62 @@ function splitMainSections(text) {
   })
 
   return SECTION_PATTERNS.map((s) => byKey.get(s.key)).filter(Boolean)
+}
+
+/** Last resort: slice raw text at section header positions */
+function splitMainSectionsByIndex(text) {
+  const normalized = text.replace(/\r\n/g, '\n')
+  const headerRegex =
+    /(?:^|\n)\s*(?:(?:#{1,3}\s*)?(?:\d+[.)]\s+)?(?:\*\*)?\s*)(Missing\s*Keywords[^\n]*|Role\s*Alignment[^\n]*|Suggestions?[^\n]*)/gi
+
+  const hits = []
+  let match
+  while ((match = headerRegex.exec(normalized)) !== null) {
+    const headerLine = match[1].trim()
+    const key = matchSectionKey(headerLine)
+    if (!key) continue
+    if (hits.some((h) => h.key === key)) continue
+    hits.push({ key, index: match.index + match[0].indexOf(headerLine) })
+  }
+
+  if (!hits.length) return []
+
+  hits.sort((a, b) => a.index - b.index)
+
+  const byKey = new Map()
+  hits.forEach((hit, i) => {
+    const start = hit.index
+    const end = hits[i + 1]?.index ?? normalized.length
+    const slice = normalized.slice(start, end).trim()
+    const lines = slice.split('\n')
+    const body = extractBodyAfterHeader(lines[0] || '', lines.slice(1))
+    if (!body) return
+
+    const config = SECTION_PATTERNS.find((s) => s.key === hit.key)
+    byKey.set(hit.key, {
+      key: hit.key,
+      title: config.title,
+      icon: config.icon,
+      blocks: parseSectionBlocks(body),
+    })
+  })
+
+  return SECTION_PATTERNS.map((s) => byKey.get(s.key)).filter(Boolean)
+}
+
+function splitMainSections(text) {
+  const strategies = [
+    splitMainSectionsByLines,
+    splitMainSectionsByRegex,
+    splitMainSectionsByIndex,
+  ]
+
+  for (const strategy of strategies) {
+    const sections = strategy(text)
+    if (sections.length > 0) return sections
+  }
+
+  return []
 }
 
 /** Parse section body into paragraphs, subheadings, and lists */
@@ -179,12 +305,16 @@ export function parseSectionBlocks(body) {
       continue
     }
 
-    if (/^[-*•]\s+/.test(line) || /^\*[A-Za-z]/.test(line)) {
+    if (/^[-*•]\s+/.test(line) || /^\d+[.)]\s+/.test(line)) {
       flushParagraph()
-      const item = line
-        .replace(/^[-*•]\s+/, '')
-        .replace(/^\*([A-Za-z])/, '$1')
+      const item = line.replace(/^[-*•]\s+/, '').replace(/^\d+[.)]\s+/, '')
       listItems.push(item)
+      continue
+    }
+
+    if (/^\*[A-Za-z]/.test(line)) {
+      flushParagraph()
+      listItems.push(line.replace(/^\*([A-Za-z])/, '$1'))
       continue
     }
 
@@ -209,6 +339,49 @@ export function parseSectionBlocks(body) {
   })
 }
 
+/** When headers cannot be found, still show separate cards from the raw report */
+function buildFallbackSections(raw) {
+  const cleaned = cleanMarkdownText(raw)
+  if (!cleaned) return []
+
+  const paragraphs = cleaned
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+
+  if (paragraphs.length >= 2) {
+    const scoreChunk = paragraphs.find((p) => /match\s*score/i.test(p))
+    const contentParagraphs = paragraphs.filter((p) => p !== scoreChunk)
+
+    const chunkSize = Math.max(
+      1,
+      Math.ceil(contentParagraphs.length / SECTION_PATTERNS.length),
+    )
+
+    return SECTION_PATTERNS.map((config, index) => {
+      const start = index * chunkSize
+      const slice = contentParagraphs.slice(start, start + chunkSize)
+      if (!slice.length) return null
+
+      return {
+        key: config.key,
+        title: config.title,
+        icon: config.icon,
+        blocks: parseSectionBlocks(slice.join('\n\n')),
+      }
+    }).filter((s) => s?.blocks?.length)
+  }
+
+  return [
+    {
+      key: 'suggestions',
+      title: 'Full report',
+      icon: 'suggestions',
+      blocks: [{ type: 'paragraph', text: cleaned }],
+    },
+  ]
+}
+
 export function getScoreLabel(score) {
   if (score == null) return { label: 'Analyzing', color: 'text-muted-foreground' }
   if (score >= 80) return { label: 'Excellent Match', color: 'text-emerald-600' }
@@ -231,7 +404,11 @@ export function parseAtsAnalysis(text) {
   }
 
   const score = extractScore(text)
-  const sections = splitMainSections(text)
+  let sections = splitMainSections(text)
+
+  if (sections.length === 0) {
+    sections = buildFallbackSections(text)
+  }
 
   return {
     score,

@@ -1,4 +1,5 @@
 import React from 'react'
+import { classicHrStyle } from '@/lib/resumeDividerStyles'
 
 function PersonalDetail({resumeInfo}) {
   return (
@@ -29,11 +30,7 @@ function PersonalDetail({resumeInfo}) {
       }}
         >{resumeInfo?.email}</h2>
       </div>
-      <hr className='border-[1.5px] my-2'
-      style={{
-        borderColor:resumeInfo?.themeColor
-      }}
-      />
+      <hr data-resume-hr style={classicHrStyle(resumeInfo?.themeColor)} />
 
 
     </div>

@@ -1,5 +1,7 @@
+import { isExperienceEnabled, getCustomSections } from './resumeSections'
+
 /** Strip HTML tags for plain-text export (ATS-friendly). */
-function stripHtml(html) {
+export function stripHtml(html) {
   if (!html) return ''
   const div = document.createElement('div')
   div.innerHTML = html
@@ -26,7 +28,11 @@ export function resumeToPlainText(resume) {
     lines.push('', 'SUMMARY', stripHtml(resume.summery))
   }
 
-  if (Array.isArray(resume.experience) && resume.experience.length) {
+  if (
+    isExperienceEnabled(resume) &&
+    Array.isArray(resume.experience) &&
+    resume.experience.length
+  ) {
     lines.push('', 'EXPERIENCE')
     resume.experience.forEach((exp) => {
       const header = [exp.title, exp.companyName].filter(Boolean).join(' — ')
@@ -76,6 +82,12 @@ export function resumeToPlainText(resume) {
       if (desc) lines.push(desc)
     })
   }
+
+  getCustomSections(resume).forEach((section) => {
+    lines.push('', section.title.toUpperCase())
+    const body = stripHtml(section.content)
+    if (body) lines.push(body)
+  })
 
   return lines.join('\n').trim()
 }

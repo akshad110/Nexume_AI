@@ -58,5 +58,12 @@ export function normalizeResume(data) {
         }))
       : [],
     website: data.website || '',
+    customSections: Array.isArray(data.customSections) ? data.customSections : [],
+    sectionVisibility: {
+      experience: true,
+      ...(typeof data.sectionVisibility === 'object' && data.sectionVisibility
+        ? data.sectionVisibility
+        : {}),
+    },
   }
 }

@@ -1,16 +1,15 @@
+import { domToCanvas } from 'modern-screenshot'
 import { resumeToPlainText } from './resumeToPlainText'
-import { RESUME_EXPORT_CSS } from './resumeExportStyles'
+import { mountExportPreview, waitForExportReady } from './exportResumeMount'
 
-/** Visual capture settings (print layout — not ideal for ATS upload) */
-const CAPTURE_SCALE = 1.25
-const JPEG_QUALITY = 0.82
+const CAPTURE_SCALE = 2
 
 function getSafeFileName(title) {
   const base = (title || 'resume').replace(/[^\w\s.-]/g, '').trim() || 'resume'
   return base.endsWith('.pdf') ? base : `${base}.pdf`
 }
 
-/** Build ATS-friendly PDF with selectable text (small file, works in all analyzers). */
+/** Plain-text PDF — ATS upload only. */
 export async function buildTextPdfFromResume(resume) {
   const text = resumeToPlainText(resume)
   if (!text.trim()) {
@@ -38,7 +37,6 @@ export async function buildTextPdfFromResume(resume) {
     pdf.setFont('helvetica', bold ? 'bold' : 'normal')
     pdf.setFontSize(size)
     const lh = bold ? sectionLineHeight : bodyLineHeight
-
     for (const line of lines) {
       ensureSpace(lh)
       pdf.text(line, margin, y)
@@ -46,20 +44,16 @@ export async function buildTextPdfFromResume(resume) {
     }
   }
 
-  const paragraphs = text.split('\n')
-
-  for (const raw of paragraphs) {
+  for (const raw of text.split('\n')) {
     const para = raw.trim()
     if (!para) {
       y += 2
       continue
     }
-
     const isSection =
       para.length < 40 &&
       para === para.toUpperCase() &&
       /^[A-Z][A-Z\s&]+$/.test(para)
-
     if (isSection) {
       ensureSpace(sectionLineHeight + 2)
       y += 2
@@ -78,234 +72,209 @@ export async function generateResumePdfBlobFromData(resume) {
   return pdf.output('blob', { type: 'application/pdf' })
 }
 
-/** Default download — text PDF for ATS compatibility (~20–80 KB). */
-export async function downloadResumePdf(resume, fileName = 'resume.pdf') {
-  const pdf = await buildTextPdfFromResume(resume)
-  pdf.save(getSafeFileName(fileName.replace(/\.pdf$/i, '')))
-}
-
-/** PDF File object with real text layer for ATS upload. */
-export async function resumeToPdfFile(resume, fileName = 'resume.pdf') {
-  const blob = await generateResumePdfBlobFromData(resume)
-  const safeName = getSafeFileName(fileName.replace(/\.pdf$/i, ''))
-  return new File([blob], safeName, { type: 'application/pdf' })
-}
-
-// --- Visual PDF (image-based, for print preview fidelity only) ---
-
-const SAFE_CLASSES = new Set([
-  'resume-export',
-  'resume-a4-export',
-  'pro-exp-html',
-])
-
-const LAYOUT_PROPS = [
-  'display',
-  'flexDirection',
-  'flexWrap',
-  'justifyContent',
-  'alignItems',
-  'gap',
-  'width',
-  'maxWidth',
-  'margin',
-  'marginTop',
-  'marginBottom',
-  'marginLeft',
-  'marginRight',
-  'padding',
-  'paddingTop',
-  'paddingBottom',
-  'paddingLeft',
-  'paddingRight',
-  'borderBottom',
-  'borderBottomWidth',
-  'borderBottomStyle',
-  'borderBottomColor',
-  'fontFamily',
-  'fontSize',
-  'fontWeight',
-  'fontStyle',
-  'lineHeight',
-  'color',
-  'backgroundColor',
-  'textAlign',
-  'textTransform',
-  'letterSpacing',
-  'textDecoration',
-  'listStyleType',
-  'whiteSpace',
-]
-
-function hasUnsupportedColor(value) {
-  if (!value) return false
-  return /oklch|lab\(|lch\(|color-mix/i.test(value)
-}
-
-function safeColorValue(prop, value) {
-  if (!hasUnsupportedColor(value)) return value
-  if (prop.includes('background')) return '#ffffff'
-  if (prop.includes('border')) return '#000000'
-  return '#000000'
-}
-
-function toKebab(prop) {
-  return prop.replace(/([A-Z])/g, '-$1').toLowerCase()
-}
-
-function copyLayoutStyles(sourceEl, targetEl, sourceWin) {
-  const computed = sourceWin.getComputedStyle(sourceEl)
-  LAYOUT_PROPS.forEach((prop) => {
-    const kebab = toKebab(prop)
-    let value = computed.getPropertyValue(kebab)
-    if (!value || value === 'initial') return
-    value = safeColorValue(kebab, value)
-    targetEl.style.setProperty(kebab, value)
-  })
-}
-
-function copyAllLayoutStyles(sourceRoot, targetRoot, sourceWin) {
-  const sourceNodes = [sourceRoot, ...sourceRoot.querySelectorAll('*')]
-  const targetNodes = [targetRoot, ...targetRoot.querySelectorAll('*')]
-  sourceNodes.forEach((source, i) => {
-    if (targetNodes[i]) copyLayoutStyles(source, targetNodes[i], sourceWin)
-  })
-}
-
-function sanitizeElementTree(root) {
-  const walk = (el) => {
-    if (el.classList?.length) {
-      const kept = [...el.classList].filter((c) => SAFE_CLASSES.has(c))
-      el.className = kept.join(' ')
-    }
-    if (el.style?.length) {
-      for (let i = 0; i < el.style.length; i++) {
-        const prop = el.style[i]
-        const val = el.style.getPropertyValue(prop)
-        if (hasUnsupportedColor(val)) {
-          el.style.setProperty(prop, safeColorValue(prop, val))
-        }
-      }
-    }
-    Array.from(el.children || []).forEach(walk)
+function getPagesToCapture(previewRoot) {
+  const pageElements = previewRoot.querySelectorAll('[data-resume-page]')
+  if (pageElements.length > 0) {
+    return Array.from(pageElements).sort(
+      (a, b) =>
+        Number(a.getAttribute('data-resume-page') ?? 0) -
+        Number(b.getAttribute('data-resume-page') ?? 0),
+    )
   }
-  walk(root)
+  const single =
+    previewRoot.querySelector('#resume-pdf-preview') ||
+    previewRoot.querySelector('.resume-a4-export') ||
+    previewRoot
+  return [single]
 }
 
-function buildIsolatedPageClone(exportPage, iframeDoc, sourceWin) {
-  const clone = exportPage.cloneNode(true)
-  sanitizeElementTree(clone)
-  clone.style.background = '#ffffff'
-  clone.style.color = '#000000'
-  clone.style.boxSizing = 'border-box'
-  clone.style.overflow = 'hidden'
-  clone.style.width = '210mm'
-  clone.style.height = '297mm'
-  iframeDoc.body.appendChild(clone)
-  copyAllLayoutStyles(exportPage, clone, sourceWin)
-  return clone
-}
+/** Screenshot one A4 page — modern-screenshot keeps Tailwind layout (oklch-safe). */
+async function capturePageElement(pageEl) {
+  pageEl.querySelectorAll('[data-pdf-hide]').forEach((el) => {
+    el.style.setProperty('display', 'none', 'important')
+  })
 
-async function captureElement(html2canvas, element) {
-  return html2canvas(element, {
+  const width = pageEl.offsetWidth
+  const height = pageEl.offsetHeight
+
+  return domToCanvas(pageEl, {
     scale: CAPTURE_SCALE,
-    useCORS: true,
-    logging: false,
     backgroundColor: '#ffffff',
-    windowWidth: element.scrollWidth,
-    windowHeight: element.scrollHeight,
-    width: element.scrollWidth,
-    height: element.scrollHeight,
-    foreignObjectRendering: false,
-    onclone: (clonedDoc) => {
-      clonedDoc.querySelectorAll('link[rel="stylesheet"]').forEach((n) => n.remove())
-      const style = clonedDoc.createElement('style')
-      style.textContent = RESUME_EXPORT_CSS
-      clonedDoc.head.appendChild(style)
-    },
+    width,
+    height,
   })
 }
 
-async function buildVisualPdfFromElement(element) {
-  if (!element) {
+function wrapResumeTextForPdf(pdf, resume) {
+  const fullText = resumeToPlainText(resume)
+  if (!fullText.trim()) return []
+
+  const margin = 12
+  const maxWidth = pdf.internal.pageSize.getWidth() - margin * 2
+  const wrappedLines = []
+
+  for (const paragraph of fullText.split('\n')) {
+    const lines = pdf.splitTextToSize(paragraph.trim() || ' ', maxWidth)
+    wrappedLines.push(...lines)
+    wrappedLines.push('')
+  }
+
+  return wrappedLines
+}
+
+/**
+ * White text drawn *before* the page image so ATS tools can extract it
+ * while the opaque screenshot fully covers it (no white holes on top).
+ */
+function addAtsTextSlice(pdf, wrappedLines, startIndex, maxLines) {
+  const pageHeight = pdf.internal.pageSize.getHeight()
+  const margin = 12
+  let y = margin
+  let count = 0
+  let lineIndex = startIndex
+
+  pdf.setFont('helvetica', 'normal')
+  pdf.setFontSize(9)
+  pdf.setTextColor(255, 255, 255)
+
+  while (
+    count < maxLines &&
+    lineIndex < wrappedLines.length &&
+    y < pageHeight - margin
+  ) {
+    const line = wrappedLines[lineIndex]
+    if (line) pdf.text(line, margin, y)
+    y += line ? 4.2 : 2
+    lineIndex += 1
+    count += 1
+  }
+
+  return lineIndex
+}
+
+export async function buildVisualPdfFromElement(previewRoot, resume = null) {
+  if (!previewRoot) {
     throw new Error('Resume preview is not ready')
   }
 
-  const pageElements = element.querySelectorAll('[data-resume-page]')
-  const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-    import('html2canvas'),
-    import('jspdf'),
-  ])
+  const { jsPDF } = await import('jspdf')
 
+  if (document.fonts?.ready) {
+    await document.fonts.ready
+  }
   await new Promise((resolve) => {
     requestAnimationFrame(() => requestAnimationFrame(resolve))
   })
+
+  const pagesToCapture = getPagesToCapture(previewRoot)
+  if (!pagesToCapture.length) {
+    throw new Error('No resume pages found to export')
+  }
 
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const pageWidth = pdf.internal.pageSize.getWidth()
   const pageHeight = pdf.internal.pageSize.getHeight()
 
-  const iframe = document.createElement('iframe')
-  iframe.setAttribute('aria-hidden', 'true')
-  iframe.style.cssText =
-    'position:fixed;left:-10000px;top:0;border:0;visibility:hidden;'
-  document.body.appendChild(iframe)
+  const wrappedLines = resume ? wrapResumeTextForPdf(pdf, resume) : []
+  const linesPerPage =
+    wrappedLines.length > 0
+      ? Math.ceil(wrappedLines.length / pagesToCapture.length)
+      : 0
+  let atsLineIndex = 0
 
-  const iframeDoc = iframe.contentDocument
-  iframeDoc.open()
-  iframeDoc.write(`<!DOCTYPE html>
-<html><head><meta charset="utf-8"><style>${RESUME_EXPORT_CSS}</style></head>
-<body style="margin:0;padding:0;background:#ffffff;"></body></html>`)
-  iframeDoc.close()
+  for (let i = 0; i < pagesToCapture.length; i += 1) {
+    if (i > 0) pdf.addPage()
 
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 100))
-
-    const pagesToCapture =
-      pageElements.length > 0
-        ? Array.from(pageElements).sort(
-            (a, b) =>
-              Number(a.getAttribute('data-resume-page') ?? 0) -
-              Number(b.getAttribute('data-resume-page') ?? 0),
-          )
-        : [
-            element.querySelector('#resume-pdf-preview') ||
-              element.querySelector('.resume-a4-export') ||
-              element,
-          ]
-
-    for (let i = 0; i < pagesToCapture.length; i++) {
-      iframeDoc.body.innerHTML = ''
-      const clone = buildIsolatedPageClone(
-        pagesToCapture[i],
-        iframeDoc,
-        window,
+    if (wrappedLines.length > 0) {
+      atsLineIndex = addAtsTextSlice(
+        pdf,
+        wrappedLines,
+        atsLineIndex,
+        linesPerPage,
       )
-      await new Promise((resolve) => setTimeout(resolve, 50))
-      const canvas = await captureElement(html2canvas, clone)
-      if (!canvas.width || !canvas.height) {
-        throw new Error('Could not capture resume preview')
-      }
-      const imgData = canvas.toDataURL('image/jpeg', JPEG_QUALITY)
-      const imgWidth = pageWidth
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
-      if (i > 0) pdf.addPage()
-      if (imgHeight <= pageHeight + 1) {
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST')
-      } else {
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, pageHeight, undefined, 'FAST')
-      }
     }
-    return pdf
-  } finally {
-    if (iframe.parentNode) iframe.parentNode.removeChild(iframe)
+
+    const canvas = await capturePageElement(pagesToCapture[i])
+    if (!canvas.width || !canvas.height) {
+      throw new Error('Could not capture resume page')
+    }
+    const imgData = canvas.toDataURL('image/png')
+    const imgWidth = pageWidth
+    const imgHeight = (canvas.height * imgWidth) / canvas.width
+    pdf.addImage(
+      imgData,
+      'PNG',
+      0,
+      0,
+      imgWidth,
+      Math.min(imgHeight, pageHeight),
+      undefined,
+      'SLOW',
+    )
+  }
+
+  return pdf
+}
+
+async function resolveCaptureRoot(resume) {
+  const mountEl = document.createElement('div')
+  mountEl.setAttribute('data-export-mount', 'true')
+  mountEl.style.cssText =
+    'position:fixed;left:0;top:0;z-index:-1;opacity:0.01;pointer-events:none;overflow:visible;'
+  document.body.appendChild(mountEl)
+
+  const reactRoot = mountExportPreview(resume, mountEl)
+  try {
+    const captureRoot = await waitForExportReady(mountEl)
+    return {
+      captureRoot,
+      cleanup: () => {
+        reactRoot.unmount()
+        mountEl.remove()
+      },
+    }
+  } catch (err) {
+    reactRoot.unmount()
+    mountEl.remove()
+    throw err
   }
 }
 
-/** Image-based PDF matching on-screen design (may not parse in some ATS tools). */
-export async function downloadStyledResumePdf(element, fileName = 'resume.pdf') {
-  const pdf = await buildVisualPdfFromElement(element)
+export async function downloadStyledResumePdf(
+  previewRoot,
+  fileName = 'resume.pdf',
+  resume = null,
+) {
+  const pdf = await buildVisualPdfFromElement(previewRoot, resume)
   pdf.save(getSafeFileName(fileName.replace(/\.pdf$/i, '')))
+}
+
+/** Download PDF — pixel-perfect match to template preview. */
+export async function downloadResumePdf(resume, fileName = 'resume.pdf') {
+  if (!resume) {
+    throw new Error('Resume data is missing')
+  }
+
+  const { captureRoot, cleanup } = await resolveCaptureRoot(resume)
+  try {
+    const pdf = await buildVisualPdfFromElement(captureRoot, resume)
+    pdf.save(getSafeFileName(fileName.replace(/\.pdf$/i, '')))
+  } finally {
+    cleanup?.()
+  }
+}
+
+/** ATS-friendly PDF file (includes hidden text layer when built from visual export). */
+export async function resumeToPdfFile(resume, fileName = 'resume.pdf') {
+  const { captureRoot, cleanup } = await resolveCaptureRoot(resume)
+  try {
+    const pdf = await buildVisualPdfFromElement(captureRoot, resume)
+    const blob = pdf.output('blob', { type: 'application/pdf' })
+    const safeName = getSafeFileName(fileName.replace(/\.pdf$/i, ''))
+    return new File([blob], safeName, { type: 'application/pdf' })
+  } finally {
+    cleanup?.()
+  }
 }
 
 export { getSafeFileName }

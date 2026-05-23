@@ -1,11 +1,12 @@
 import React from 'react'
+import { PROFESSIONAL_FONT } from '@/lib/resumeExportStyles'
 
 function ProfessionalProjects({ projects, themeColor }) {
   const list = (projects ?? []).filter((p) => p?.name || p?.description)
   if (!list.length) return null
 
   return (
-    <div style={{ fontSize: '10px', lineHeight: 1.45 }}>
+    <div style={{ fontSize: PROFESSIONAL_FONT.body, lineHeight: 1.45 }}>
       {list.map((item, index) => (
         <div
           key={index}
@@ -17,27 +18,26 @@ function ProfessionalProjects({ projects, themeColor }) {
             {item.name}
           </p>
           {item.techUsed && (
-            <p style={{ margin: '0 0 4px 0', fontStyle: 'italic', fontSize: '9px' }}>
+            <p
+              style={{
+                margin: '0 0 4px 0',
+                fontStyle: 'italic',
+                fontSize: PROFESSIONAL_FONT.small,
+              }}
+            >
               Technologies: {item.techUsed}
             </p>
           )}
           {item.description && (
-            <ul
+            <div
+              className="pro-exp-html"
               style={{
-                margin: 0,
-                paddingLeft: '14px',
-                listStyleType: 'disc',
+                marginTop: '4px',
+                fontSize: PROFESSIONAL_FONT.small,
+                fontStyle: 'normal',
               }}
-            >
-              {item.description
-                .split(/(?<=[.!?])\s+/)
-                .filter(Boolean)
-                .map((line, i) => (
-                  <li key={i} style={{ marginBottom: '2px' }}>
-                    {line.trim()}
-                  </li>
-                ))}
-            </ul>
+              dangerouslySetInnerHTML={{ __html: item.description }}
+            />
           )}
         </div>
       ))}

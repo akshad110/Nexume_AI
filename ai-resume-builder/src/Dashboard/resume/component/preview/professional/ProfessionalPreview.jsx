@@ -5,14 +5,15 @@ import ProfessionalEducation from './ProfessionalEducation'
 import ProfessionalExperience from './ProfessionalExperience'
 import ProfessionalProjects from './ProfessionalProjects'
 import SkillsTable from '../SkillsTable'
+import { hasExperienceContent, getCustomSections } from '@/lib/resumeSections'
+import { PROFESSIONAL_FONT } from '@/lib/resumeExportStyles'
 
 /** Template 2 — education, skills table, projects, experience */
 function ProfessionalPreview({ resumeInfo }) {
   const themeColor = resumeInfo?.themeColor || '#171717'
   const hasEducation = (resumeInfo?.education ?? []).length > 0
-  const hasExperience = (resumeInfo?.experience ?? []).some(
-    (e) => e?.title || e?.companyName,
-  )
+  const hasExperience = hasExperienceContent(resumeInfo)
+  const customSections = getCustomSections(resumeInfo)
   const hasProjects = (resumeInfo?.projects ?? []).some(
     (p) => p?.name || p?.description,
   )
@@ -27,8 +28,8 @@ function ProfessionalPreview({ resumeInfo }) {
         background: '#ffffff',
         color: '#000000',
         fontFamily: 'Georgia, "Times New Roman", Times, serif',
-        fontSize: '11px',
-        lineHeight: 1.35,
+        fontSize: PROFESSIONAL_FONT.base,
+        lineHeight: 1.4,
       }}
     >
       <ProfessionalHeader resumeInfo={resumeInfo} themeColor={themeColor} />
@@ -44,7 +45,11 @@ function ProfessionalPreview({ resumeInfo }) {
 
       {hasSkills && (
         <ProfessionalSection title="Skills" themeColor={themeColor}>
-          <SkillsTable skills={resumeInfo.skills} themeColor={themeColor} />
+          <SkillsTable
+            skills={resumeInfo.skills}
+            themeColor={themeColor}
+            fontSize={PROFESSIONAL_FONT.body}
+          />
         </ProfessionalSection>
       )}
 
@@ -65,6 +70,22 @@ function ProfessionalPreview({ resumeInfo }) {
           />
         </ProfessionalSection>
       )}
+
+      {customSections.map((section, index) => (
+        <ProfessionalSection
+          key={index}
+          title={section.title}
+          themeColor={themeColor}
+        >
+          {section.content && (
+            <div
+              className="pro-exp-html"
+              style={{ fontSize: PROFESSIONAL_FONT.body }}
+              dangerouslySetInnerHTML={{ __html: section.content }}
+            />
+          )}
+        </ProfessionalSection>
+      ))}
     </div>
   )
 }

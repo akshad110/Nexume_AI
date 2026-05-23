@@ -1,5 +1,5 @@
 import React from 'react'
-import { proRow } from '@/lib/resumeExportStyles'
+import { PROFESSIONAL_FONT, proRow } from '@/lib/resumeExportStyles'
 
 function ProfessionalExperience({ experience, themeColor }) {
   return (
@@ -8,7 +8,7 @@ function ProfessionalExperience({ experience, themeColor }) {
         <li
           key={index}
           style={{
-            fontSize: '10px',
+            fontSize: PROFESSIONAL_FONT.body,
             marginBottom: index < experience.length - 1 ? '10px' : 0,
           }}
         >
@@ -21,7 +21,7 @@ function ProfessionalExperience({ experience, themeColor }) {
           <div
             style={{
               ...proRow,
-              fontSize: '9px',
+              fontSize: PROFESSIONAL_FONT.small,
               fontStyle: 'italic',
               marginTop: '2px',
             }}
@@ -44,7 +44,7 @@ function ProfessionalExperience({ experience, themeColor }) {
               className="pro-exp-html"
               style={{
                 marginTop: '4px',
-                fontSize: '9px',
+                fontSize: PROFESSIONAL_FONT.small,
                 fontStyle: 'normal',
               }}
               dangerouslySetInnerHTML={{ __html: item.workSummery }}
