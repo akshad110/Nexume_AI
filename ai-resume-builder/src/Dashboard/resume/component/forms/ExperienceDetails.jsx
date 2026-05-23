@@ -177,6 +177,7 @@ const [experienceList, setExperienceList] = useState([{ ...formField }]);
                 <div className="col-span-2">
                   <RichTextEditor
                     index={index}
+                    positionTitle={item?.title}
                     defaultValue={item?.workSummery}
                     onRichTextEditorChange={(e) =>
                       handleRichTextEditor(e, "workSummery", index)

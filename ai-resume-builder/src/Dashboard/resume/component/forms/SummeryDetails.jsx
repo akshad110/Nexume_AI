@@ -6,10 +6,11 @@ import { useParams } from 'react-router-dom';
 import GlobalApis from "../../../../../service/GlobalApis";
 import { Brain, LoaderCircle } from "lucide-react";
 import { toast } from 'sonner';
-import { AIChatSession } from '../../../../../service/AIModal';
+import { generateAIContent } from '../../../../../service/AIModal';
 
 
-const prompt = "Job Title : {jobTitle}, Depends on job title give me summary for my resume within 4-5 lines in JSON format with field experience Level and Summary with Experience level for Fresher,Mid-Level,Experienced"
+const prompt =
+  'Job title: {jobTitle}. Return a JSON array of exactly 3 objects for resume summaries (Fresher, Mid-Level, Experienced). Each object: {"experienceLevel":"Fresher","summary":"4-5 lines of text"}. Valid JSON only, no markdown.';
 function SummeryDetails({enableNext}) {
     const {resumeInfo,setResumeInfo}=useContext(ResumeInfoContext);
     const [summery,setSummery]=useState();
@@ -28,16 +29,32 @@ function SummeryDetails({enableNext}) {
         }
     }, [resumeInfo?.documentId]);
 
-    const GenerateSummeryFromAI=async()=>{
-    setLoading(true);
-    const PROMPT = prompt.replace('{jobTitle}',resumeInfo?.jobTitle)
-    console.log(PROMPT);
-    const result = await AIChatSession.sendMessage(PROMPT)
-    const responseText = await result.response.text();
-    console.log(responseText);
-    setAiGeneratedSummary(JSON.parse(responseText));
-    setLoading(false);
-    }
+    const GenerateSummeryFromAI = async () => {
+      const jobTitle = (resumeInfo?.jobTitle ?? "").trim();
+      if (!jobTitle) {
+        toast.error("Please add a Job Title on the Personal Details step first.");
+        return;
+      }
+      if (!import.meta.env.VITE_GOOGLE_AI_API_KEY) {
+        toast.error(
+          "Google AI key is missing. Add VITE_GOOGLE_AI_API_KEY in .env.local or Render.",
+        );
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const PROMPT = prompt.replace("{jobTitle}", jobTitle);
+        const parsed = await generateAIContent(PROMPT);
+        const list = Array.isArray(parsed) ? parsed : parsed?.suggestions ?? [parsed];
+        setAiGeneratedSummary(list.filter(Boolean));
+      } catch (err) {
+        console.error("Generate summary AI error:", err);
+        toast.error(err?.message || "Failed to generate summary.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
     const onSave = (e)=>{
         e.preventDefault();
