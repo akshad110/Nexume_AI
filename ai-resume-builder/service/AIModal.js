@@ -2,9 +2,25 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
 
-/** Override in .env: VITE_GEMINI_MODEL=gemini-1.5-flash */
-const MODEL_NAME =
-  import.meta.env.VITE_GEMINI_MODEL || "gemini-1.5-flash";
+const DEFAULT_MODEL = "gemini-3.1-flash-lite";
+
+/**
+ * API expects lowercase ids like gemini-3.1-flash-lite (not "Gemini 3.1 Flash Lite").
+ */
+export function normalizeModelId(name) {
+  const raw = (name || DEFAULT_MODEL).trim();
+  if (!raw) return DEFAULT_MODEL;
+
+  // Already valid API format: gemini-* with no spaces
+  if (/^gemini-[a-z0-9.-]+$/i.test(raw) && !/\s/.test(raw)) {
+    return raw.toLowerCase();
+  }
+
+  // Display name from AI Studio UI → API id
+  return raw.toLowerCase().replace(/\s+/g, "-");
+}
+
+const MODEL_NAME = normalizeModelId(import.meta.env.VITE_GEMINI_MODEL);
 
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
@@ -18,14 +34,22 @@ const generationConfig = {
 
 function getModel(modelName = MODEL_NAME) {
   if (!genAI) return null;
-  return genAI.getGenerativeModel({ model: modelName });
+  return genAI.getGenerativeModel({ model: normalizeModelId(modelName) });
 }
 
 function toFriendlyAIError(err) {
   const msg = err?.message || String(err);
   if (msg.includes("429") || msg.toLowerCase().includes("quota")) {
     return new Error(
-      "Gemini free quota exceeded. Wait ~1 minute and retry, or create a new API key at ai.google.dev and enable billing for higher limits.",
+      "Gemini free quota exceeded. Wait ~1 minute and retry, or enable billing at ai.google.dev.",
+    );
+  }
+  if (
+    msg.includes("400") &&
+    (msg.includes("model") || msg.includes("unexpected model name"))
+  ) {
+    return new Error(
+      `Invalid model name. Set VITE_GEMINI_MODEL to an API id like "${DEFAULT_MODEL}" (lowercase, hyphens — not the display name from AI Studio).`,
     );
   }
   if (msg.includes("API key") || msg.includes("403")) {
