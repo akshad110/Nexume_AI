@@ -2,11 +2,11 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
 
-const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+/** Override in .env: VITE_GEMINI_MODEL=gemini-1.5-flash */
+const MODEL_NAME =
+  import.meta.env.VITE_GEMINI_MODEL || "gemini-1.5-flash";
 
-const model = genAI?.getGenerativeModel({
-  model: "gemini-2.0-flash",
-});
+const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
 const generationConfig = {
   temperature: 0.7,
@@ -15,6 +15,26 @@ const generationConfig = {
   maxOutputTokens: 8192,
   responseMimeType: "application/json",
 };
+
+function getModel(modelName = MODEL_NAME) {
+  if (!genAI) return null;
+  return genAI.getGenerativeModel({ model: modelName });
+}
+
+function toFriendlyAIError(err) {
+  const msg = err?.message || String(err);
+  if (msg.includes("429") || msg.toLowerCase().includes("quota")) {
+    return new Error(
+      "Gemini free quota exceeded. Wait ~1 minute and retry, or create a new API key at ai.google.dev and enable billing for higher limits.",
+    );
+  }
+  if (msg.includes("API key") || msg.includes("403")) {
+    return new Error(
+      "Invalid or blocked API key. Check VITE_GOOGLE_AI_API_KEY in .env.local or Render.",
+    );
+  }
+  return err instanceof Error ? err : new Error(msg);
+}
 
 /** Parse JSON from Gemini (strips markdown fences if present). */
 export function parseAIJson(text) {
@@ -28,21 +48,29 @@ export function parseAIJson(text) {
 
 /** One-shot JSON generation (experience bullets, summaries, etc.). */
 export async function generateAIContent(prompt) {
-  if (!apiKey || !model) {
+  if (!apiKey) {
     throw new Error(
       "Google AI is not configured. Add VITE_GOOGLE_AI_API_KEY to .env.local or Render.",
     );
   }
 
-  const result = await model.generateContent({
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
-    generationConfig,
-  });
+  const model = getModel();
+  if (!model) {
+    throw new Error("Google AI client failed to initialize.");
+  }
 
-  return parseAIJson(result.response.text());
+  try {
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig,
+    });
+    return parseAIJson(result.response.text());
+  } catch (err) {
+    throw toFriendlyAIError(err);
+  }
 }
 
-/** @deprecated Prefer generateAIContent — kept for any legacy usage */
-export const AIChatSession = model
-  ? model.startChat({ generationConfig, history: [] })
+/** @deprecated Prefer generateAIContent */
+export const AIChatSession = getModel()
+  ? getModel().startChat({ generationConfig, history: [] })
   : null;
