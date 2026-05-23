@@ -52,18 +52,20 @@ const professionalSample = {
   projects: [
     {
       name: 'QuantSoftware Toolkit',
+      techUsed: 'Python, Pandas, NumPy',
       description:
         'Open source python library for financial data analysis and machine learning for finance.',
     },
     {
       name: 'Github Visualization',
+      techUsed: 'JavaScript, D3.js',
       description: 'Data Visualization of Git Log data using D3.',
     },
   ],
-  programmingSkills: {
-    languages: 'Scala, Python, Javascript, C++, SQL, Java',
-    technologies: 'AWS, Play, React, Kafka, GCE',
-  },
+  skills: [
+    { title: 'Languages', skills: ['Scala', 'Python', 'Javascript', 'C++', 'SQL', 'Java'] },
+    { title: 'Tools', skills: ['AWS', 'Play', 'React', 'Kafka', 'GCE'] },
+  ],
 }
 
 const classicSample = {
@@ -90,7 +92,11 @@ const classicSample = {
     },
   ],
   projects: [
-    { name: 'Portfolio Site', description: 'Personal portfolio with React.' },
+    {
+      name: 'Portfolio Site',
+      techUsed: 'React, Vite, Tailwind CSS',
+      description: 'Personal portfolio with React.',
+    },
   ],
   education: [
     {
@@ -139,6 +145,13 @@ const modernSample = {
   ],
   skills: [
     { title: 'Tools', skills: ['Figma', 'Jira', 'Git'] },
+  ],
+  projects: [
+    {
+      name: 'Analytics Dashboard',
+      techUsed: 'React, Node.js',
+      description: 'Built internal metrics dashboard for product team.',
+    },
   ],
 }
 

@@ -8,6 +8,11 @@ function ProfessionalHeader({ resumeInfo, themeColor }) {
 
   return (
     <div style={{ marginBottom: '12px' }}>
+      {resumeInfo?.address && (
+        <p style={{ fontSize: '10px', margin: '0 0 6px 0', lineHeight: 1.4 }}>
+          {resumeInfo.address}
+        </p>
+      )}
       <div style={proRow}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <h1 style={proName(themeColor)}>{fullName || 'Your Name'}</h1>

@@ -1,27 +1,45 @@
 import React from 'react'
-import PersonalDetail from '../PersonalDetail'
 import Summary from '../Summary'
 import Experience from '../Experience'
 import Education from '../Education'
-import Skills from '../Skills'
+import SkillsTable from '../SkillsTable'
+import ModernProjects from './ModernProjects'
 
+/** Template 3 — centered header, summary, experience, projects, education, skills */
 function ModernPreview({ resumeInfo }) {
   const accent = resumeInfo?.themeColor || '#0f172a'
+  const fullName = [resumeInfo?.firstName, resumeInfo?.lastName]
+    .filter(Boolean)
+    .join(' ')
+
+  const contactParts = [
+    resumeInfo?.email,
+    resumeInfo?.phone,
+    resumeInfo?.website,
+    resumeInfo?.address,
+  ].filter(Boolean)
 
   return (
     <div
-      className="text-black text-[11px] leading-relaxed"
-      style={{ color: '#111', fontFamily: 'system-ui, sans-serif' }}
+      className="resume-export text-black text-[11px] leading-relaxed"
+      style={{ color: '#111', fontFamily: '"Times New Roman", Times, serif' }}
     >
-      <div className="border-b-2 pb-3 mb-4" style={{ borderColor: accent }}>
-        <PersonalDetail resumeInfo={resumeInfo} />
-      </div>
+      <header className="text-center mb-4 pb-3 border-b border-gray-300">
+        <h1 className="text-2xl font-normal tracking-wide m-0 mb-2">{fullName}</h1>
+        {contactParts.length > 0 && (
+          <p className="text-[10px] text-gray-700 m-0 leading-relaxed">
+            {contactParts.join(' · ')}
+          </p>
+        )}
+        {resumeInfo?.jobTitle && (
+          <p className="text-[10px] mt-1 mb-0 text-gray-600">{resumeInfo.jobTitle}</p>
+        )}
+      </header>
 
       {resumeInfo?.summery ? (
         <section className="mb-4">
           <h2
-            className="text-xs font-bold uppercase tracking-widest mb-2"
-            style={{ color: accent }}
+            className="text-sm font-normal uppercase tracking-[0.2em] mb-2 pb-1 border-b border-gray-400"
           >
             Summary
           </h2>
@@ -30,21 +48,24 @@ function ModernPreview({ resumeInfo }) {
       ) : null}
 
       <section className="mb-4">
-        <h2
-          className="text-xs font-bold uppercase tracking-widest mb-2"
-          style={{ color: accent }}
-        >
-          Experience
+        <h2 className="text-sm font-normal uppercase tracking-[0.2em] mb-2 pb-1 border-b border-gray-400">
+          Work Experience
         </h2>
-        <Experience resumeInfo={resumeInfo} />
+        <Experience resumeInfo={resumeInfo} hideTitle />
       </section>
+
+      {(resumeInfo?.projects ?? []).some((p) => p?.name || p?.description) && (
+        <section className="mb-4">
+          <h2 className="text-sm font-normal uppercase tracking-[0.2em] mb-2 pb-1 border-b border-gray-400">
+            Projects
+          </h2>
+          <ModernProjects resumeInfo={resumeInfo} />
+        </section>
+      )}
 
       {(resumeInfo?.education ?? []).length > 0 && (
         <section className="mb-4">
-          <h2
-            className="text-xs font-bold uppercase tracking-widest mb-2"
-            style={{ color: accent }}
-          >
+          <h2 className="text-sm font-normal uppercase tracking-[0.2em] mb-2 pb-1 border-b border-gray-400">
             Education
           </h2>
           <Education resumeInfo={resumeInfo} />
@@ -53,13 +74,10 @@ function ModernPreview({ resumeInfo }) {
 
       {(resumeInfo?.skills ?? []).length > 0 && (
         <section>
-          <h2
-            className="text-xs font-bold uppercase tracking-widest mb-2"
-            style={{ color: accent }}
-          >
+          <h2 className="text-sm font-normal uppercase tracking-[0.2em] mb-2 pb-1 border-b border-gray-400">
             Skills
           </h2>
-          <Skills resumeInfo={resumeInfo} />
+          <SkillsTable skills={resumeInfo.skills} themeColor={accent} />
         </section>
       )}
     </div>

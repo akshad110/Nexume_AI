@@ -1,27 +1,47 @@
 import React from 'react'
 
 function ProfessionalProjects({ projects, themeColor }) {
+  const list = (projects ?? []).filter((p) => p?.name || p?.description)
+  if (!list.length) return null
+
   return (
-    <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-      {(projects ?? []).map((item, index) => (
-        <li
+    <div style={{ fontSize: '10px', lineHeight: 1.45 }}>
+      {list.map((item, index) => (
+        <div
           key={index}
           style={{
-            fontSize: '10px',
-            marginBottom: index < projects.length - 1 ? '6px' : 0,
-            lineHeight: 1.4,
+            marginBottom: index < list.length - 1 ? '10px' : 0,
           }}
         >
-          <span style={{ fontWeight: 700, color: themeColor }}>{item?.name}</span>
-          {item?.description && (
-            <span>
-              {' : '}
-              {item.description}
-            </span>
+          <p style={{ margin: '0 0 2px 0', fontWeight: 700, color: themeColor }}>
+            {item.name}
+          </p>
+          {item.techUsed && (
+            <p style={{ margin: '0 0 4px 0', fontStyle: 'italic', fontSize: '9px' }}>
+              Technologies: {item.techUsed}
+            </p>
           )}
-        </li>
+          {item.description && (
+            <ul
+              style={{
+                margin: 0,
+                paddingLeft: '14px',
+                listStyleType: 'disc',
+              }}
+            >
+              {item.description
+                .split(/(?<=[.!?])\s+/)
+                .filter(Boolean)
+                .map((line, i) => (
+                  <li key={i} style={{ marginBottom: '2px' }}>
+                    {line.trim()}
+                  </li>
+                ))}
+            </ul>
+          )}
+        </div>
       ))}
-    </ul>
+    </div>
   )
 }
 

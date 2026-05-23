@@ -4,23 +4,24 @@ export const TEMPLATE_IDS = {
   MODERN: 'modern',
 }
 
+/** Matches template1.tex — sans-serif, experience → projects → education → skills */
 export const RESUME_TEMPLATES = [
   {
     id: TEMPLATE_IDS.CLASSIC,
     name: 'Classic',
-    description: 'Color accents · Summary · Skills · Projects',
+    description: 'Template 1 · Experience · Projects · Education · Skills',
     previewAccent: '#7c3aed',
   },
   {
     id: TEMPLATE_IDS.PROFESSIONAL,
-    name: 'Professional (LaTeX)',
-    description: 'ATS layout · Education · Experience · Projects · Programming Skills',
+    name: 'Professional',
+    description: 'Template 2 · Education · Skills table · Projects · Experience',
     previewAccent: '#171717',
   },
   {
     id: TEMPLATE_IDS.MODERN,
     name: 'Modern',
-    description: 'Clean minimal · Summary · Experience · Education · Skills',
+    description: 'Template 3 · Summary · Experience · Projects · Education · Skills',
     previewAccent: '#0f172a',
   },
 ]
@@ -39,12 +40,13 @@ const FORM_STEPS_BY_TEMPLATE = {
     'education',
     'experience',
     'projects',
-    'programmingSkills',
+    'skills',
   ],
   [TEMPLATE_IDS.MODERN]: [
     'personal',
     'summary',
     'experience',
+    'projects',
     'education',
     'skills',
   ],
@@ -94,7 +96,6 @@ export const STEP_LABELS = {
   projects: 'Projects',
   education: 'Education',
   skills: 'Skills',
-  programmingSkills: 'Programming Skills',
 }
 
 export function getStepLabel(stepKey) {

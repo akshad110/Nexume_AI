@@ -10,7 +10,6 @@ import ExperienceDetails from "./forms/ExperienceDetails";
 import EducationDetails from "./forms/EducationDetails";
 import SkillsDetails from "./forms/SkillsDetails";
 import ProjectsDetails from "./forms/ProjectsDetails";
-import ProgrammingSkillsDetails from "./forms/ProgrammingSkillsDetails";
 import ThemePicker from "./ThemePicker";
 import { ResumeInfoContext } from "@/context/ResumeContext";
 import { getStepCount, getStepKey, getStepLabel, getTemplateMeta } from "@/data/resumeTemplates";
@@ -57,8 +56,6 @@ function FormSection() {
         return <SkillsDetails />;
       case "projects":
         return <ProjectsDetails />;
-      case "programmingSkills":
-        return <ProgrammingSkillsDetails />;
       default:
         return <PersonalDetailForm enableNext={(v) => setEnableNext(v)} />;
     }

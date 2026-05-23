@@ -14,14 +14,16 @@ import {
   isModernTemplate,
 } from '@/data/resumeTemplates'
 
+/** Template 1 — sans-serif, experience → projects → education → skills */
 function ClassicPreview({ resumeInfo }) {
   return (
     <div
-      className="h-full text-black"
+      className="h-full text-black px-1"
       style={{
-        borderColor: resumeInfo?.themeColor || '#333333',
         background: '#ffffff',
-        color: '#111111',
+        color: '#1a1a1a',
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        fontSize: '11px',
       }}
     >
       <PersonalDetail resumeInfo={resumeInfo} />

@@ -4,8 +4,9 @@ import ProfessionalSection from './ProfessionalSection'
 import ProfessionalEducation from './ProfessionalEducation'
 import ProfessionalExperience from './ProfessionalExperience'
 import ProfessionalProjects from './ProfessionalProjects'
-import ProfessionalProgrammingSkills from './ProfessionalProgrammingSkills'
+import SkillsTable from '../SkillsTable'
 
+/** Template 2 — education, skills table, projects, experience */
 function ProfessionalPreview({ resumeInfo }) {
   const themeColor = resumeInfo?.themeColor || '#171717'
   const hasEducation = (resumeInfo?.education ?? []).length > 0
@@ -15,9 +16,9 @@ function ProfessionalPreview({ resumeInfo }) {
   const hasProjects = (resumeInfo?.projects ?? []).some(
     (p) => p?.name || p?.description,
   )
-  const hasProgrammingSkills =
-    resumeInfo?.programmingSkills?.languages ||
-    resumeInfo?.programmingSkills?.technologies
+  const hasSkills = (resumeInfo?.skills ?? []).some(
+    (s) => s?.title || (s?.skills && s.skills.length),
+  )
 
   return (
     <div
@@ -41,12 +42,9 @@ function ProfessionalPreview({ resumeInfo }) {
         </ProfessionalSection>
       )}
 
-      {hasExperience && (
-        <ProfessionalSection title="Experience" themeColor={themeColor}>
-          <ProfessionalExperience
-            experience={resumeInfo.experience}
-            themeColor={themeColor}
-          />
+      {hasSkills && (
+        <ProfessionalSection title="Skills" themeColor={themeColor}>
+          <SkillsTable skills={resumeInfo.skills} themeColor={themeColor} />
         </ProfessionalSection>
       )}
 
@@ -59,10 +57,10 @@ function ProfessionalPreview({ resumeInfo }) {
         </ProfessionalSection>
       )}
 
-      {hasProgrammingSkills && (
-        <ProfessionalSection title="Programming Skills" themeColor={themeColor}>
-          <ProfessionalProgrammingSkills
-            programmingSkills={resumeInfo.programmingSkills}
+      {hasExperience && (
+        <ProfessionalSection title="Experience" themeColor={themeColor}>
+          <ProfessionalExperience
+            experience={resumeInfo.experience}
             themeColor={themeColor}
           />
         </ProfessionalSection>

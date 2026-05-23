@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom'
 import GlobalApis from '../../../../../service/GlobalApis'
 import { toast } from 'sonner'
 
-const emptyProject = { name: '', description: '' }
+const emptyProject = { name: '', techUsed: '', description: '' }
 
 function ProjectsDetails() {
   const [loading, setLoading] = useState(false)
@@ -22,7 +22,13 @@ function ProjectsDetails() {
     if (!id || initializedFor.current === id) return
     initializedFor.current = id
     if (resumeInfo?.projects?.length > 0) {
-      setProjectsList(resumeInfo.projects)
+      setProjectsList(
+        resumeInfo.projects.map((p) => ({
+          name: p.name || '',
+          techUsed: p.techUsed || '',
+          description: p.description || '',
+        })),
+      )
     }
   }, [resumeInfo?.documentId])
 
@@ -45,12 +51,21 @@ function ProjectsDetails() {
   }
 
   const removeProject = () => {
-    const next = projectsList.length > 1 ? projectsList.slice(0, -1) : projectsList
+    const next =
+      projectsList.length > 1 ? projectsList.slice(0, -1) : projectsList
     setProjectsList(next)
     syncPreview(next)
   }
 
   const onSave = () => {
+    const invalid = projectsList.some(
+      (p) => !p.name?.trim() || !p.description?.trim(),
+    )
+    if (invalid) {
+      toast.error('Each project needs a name and description')
+      return
+    }
+
     setLoading(true)
     GlobalApis.UpdateResumeInfo(params.resumeid, {
       data: { projects: projectsList },
@@ -76,18 +91,29 @@ function ProjectsDetails() {
             className="grid grid-cols-1 gap-3 border p-3 my-5 rounded-lg"
           >
             <div>
-              <label>Project Name</label>
+              <label className="text-xs">Project Name</label>
               <Input
                 name="name"
+                required
                 value={item.name ?? ''}
                 placeholder="QuantSoftware Toolkit"
                 onChange={(e) => handleEvent(e, index)}
               />
             </div>
             <div>
-              <label>Description</label>
+              <label className="text-xs">Tech Used</label>
+              <Input
+                name="techUsed"
+                value={item.techUsed ?? ''}
+                placeholder="Python, React, PostgreSQL"
+                onChange={(e) => handleEvent(e, index)}
+              />
+            </div>
+            <div>
+              <label className="text-xs">Description</label>
               <Textarea
                 name="description"
+                required
                 value={item.description ?? ''}
                 placeholder="Open source python library for financial data analysis..."
                 onChange={(e) => handleEvent(e, index)}

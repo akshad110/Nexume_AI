@@ -67,6 +67,14 @@ function SkillsDetails() {
   };
 
   const onSave = () => {
+    const invalid = skillsList.some(
+      (row) => !row.title?.trim() || !row.skills?.trim(),
+    );
+    if (invalid) {
+      toast.error("Fill Skills Type and comma-separated skills for each row");
+      return;
+    }
+
     setLoading(true);
     const formattedSkills = formatSkillsForPreview(skillsList);
     GlobalApis.UpdateResumeInfo(params.resumeid, {
@@ -93,18 +101,20 @@ function SkillsDetails() {
             className="grid grid-cols-1 gap-3 border p-3 my-5 rounded-lg"
           >
             <div>
-              <label>Skills Type</label>
+              <label className="text-xs">Skills Type</label>
               <Input
                 name="title"
+                required
                 placeholder="Frontend"
                 value={item.title}
                 onChange={(e) => handleEvent(index, e)}
               />
             </div>
             <div>
-              <label>Skills (Comma Separated)</label>
+              <label className="text-xs">Skills (Comma Separated)</label>
               <Input
                 name="skills"
+                required
                 placeholder="React,Tailwind CSS"
                 value={item.skills}
                 onChange={(e) => handleEvent(index, e)}

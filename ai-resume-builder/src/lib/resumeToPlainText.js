@@ -71,6 +71,7 @@ export function resumeToPlainText(resume) {
     lines.push('', 'PROJECTS')
     resume.projects.forEach((p) => {
       if (p.name) lines.push(p.name)
+      if (p.techUsed) lines.push(`Tech: ${p.techUsed}`)
       const desc = stripHtml(p.description)
       if (desc) lines.push(desc)
     })

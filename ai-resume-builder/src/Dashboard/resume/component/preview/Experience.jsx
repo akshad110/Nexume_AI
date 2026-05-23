@@ -1,21 +1,24 @@
 import React from 'react'
 
-function Experience({resumeInfo}) {
+function Experience({ resumeInfo, hideTitle = false }) {
   return (
-    <div className='my-6'>
-      <h2 className='text-center font-bold text-sm mb-2'
-      style={{
-        color:resumeInfo?.themeColor
-      }}
-      >Professional Experience</h2>
+    <div className={hideTitle ? 'my-2' : 'my-6'}>
+      {!hideTitle && (
+        <>
+          <h2
+            className="text-center font-bold text-sm mb-2"
+            style={{ color: resumeInfo?.themeColor }}
+          >
+            Professional Experience
+          </h2>
+          <hr
+            className="border-[1.5px] my-2"
+            style={{ borderColor: resumeInfo?.themeColor }}
+          />
+        </>
+      )}
 
-       <hr className='border-[1.5px] my-2'
-      style={{
-        borderColor:resumeInfo?.themeColor
-      }}
-      />
-
-      {(resumeInfo?.experience ?? []).map((experience,index)=>(
+      {(resumeInfo?.experience ?? []).map((experience, index) => (
                 <div key={index} className='my-5'>
 
             <h2 className='text-sm font-bold'
