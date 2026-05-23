@@ -178,15 +178,30 @@ def analyze_resume():
         job_description = request.form.get("job_description")
 
         upload_file = request.files.get("resume")
+        resume_text = request.form.get("resume_text", "").strip()
 
-        if not job_description or not upload_file:
-
+        if not job_description:
             return jsonify({
                 "success": False,
-                "message": "Job description and resume are required"
+                "message": "Job description is required"
             }), 400
 
-        resume_data = extract_text(upload_file)
+        if not upload_file and not resume_text:
+            return jsonify({
+                "success": False,
+                "message": "Resume file or resume text is required"
+            }), 400
+
+        if resume_text:
+            resume_data = resume_text
+        else:
+            resume_data = extract_text(upload_file)
+
+        if not resume_data or not resume_data.strip():
+            return jsonify({
+                "success": False,
+                "message": "Could not read resume content. Try exporting as TXT from the builder or use a text-based PDF."
+            }), 400
 
         content = f"""
 You are an expert in Resume Screening and ATS Optimization.

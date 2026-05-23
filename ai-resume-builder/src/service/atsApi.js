@@ -7,11 +7,22 @@ export function getAtsApiUrl() {
   )
 }
 
-export async function analyzeResumeWithAts({ jobDescription, resumeFile }) {
+export async function analyzeResumeWithAts({
+  jobDescription,
+  resumeFile,
+  resumeText,
+}) {
   const baseUrl = getAtsApiUrl()
   const formData = new FormData()
   formData.append('job_description', jobDescription)
-  formData.append('resume', resumeFile)
+
+  if (resumeText) {
+    formData.append('resume_text', resumeText)
+  } else if (resumeFile) {
+    formData.append('resume', resumeFile)
+  } else {
+    throw new Error('Resume file or text is required')
+  }
 
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 120000)

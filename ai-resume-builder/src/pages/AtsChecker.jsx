@@ -1,4 +1,5 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
@@ -15,18 +16,21 @@ const ACCEPTED_TYPES = {
   'text/plain': 'TXT',
 }
 
-const MAX_FILE_MB = 5
+const MAX_FILE_MB = 10
 
 const TIPS = [
   { title: 'Paste the full job ad', desc: 'Include requirements & nice-to-haves' },
-  { title: 'PDF or TXT only', desc: 'Clean text parses best for ATS' },
+  { title: 'TXT works best', desc: 'Use “Check ATS” from your resume for instant text export' },
   { title: 'Under a minute', desc: 'First run may take longer on cold start' },
 ]
 
 function AtsChecker() {
+  const location = useLocation()
   const fileInputRef = useRef(null)
   const [jobDescription, setJobDescription] = useState('')
   const [resumeFile, setResumeFile] = useState(null)
+  const [resumeText, setResumeText] = useState(null)
+  const [fromBuilder, setFromBuilder] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [loading, setLoading] = useState(false)
   const [loadingProgress, setLoadingProgress] = useState(0)
@@ -58,9 +62,27 @@ function AtsChecker() {
     return true
   }
 
+  useEffect(() => {
+    const state = location.state
+    if (!state?.resumeFile && !state?.resumeText) return
+
+    if (state.resumeFile && validateFile(state.resumeFile)) {
+      setResumeFile(state.resumeFile)
+    }
+    if (state.resumeText) {
+      setResumeText(state.resumeText)
+    }
+    if (state.fromBuilder) {
+      setFromBuilder(true)
+    }
+    window.history.replaceState({}, document.title)
+  }, [location.state])
+
   const handleFile = (file) => {
     if (validateFile(file)) {
       setResumeFile(file)
+      setResumeText(null)
+      setFromBuilder(false)
       setResult(null)
       setShowResults(false)
     }
@@ -77,7 +99,7 @@ function AtsChecker() {
       toast.error('Paste the job description first')
       return
     }
-    if (!resumeFile) {
+    if (!resumeFile && !resumeText) {
       toast.error('Upload your resume (PDF or TXT)')
       return
     }
@@ -94,7 +116,8 @@ function AtsChecker() {
     try {
       const data = await analyzeResumeWithAts({
         jobDescription: jobDescription.trim(),
-        resumeFile,
+        resumeFile: resumeText ? undefined : resumeFile,
+        resumeText: resumeText || undefined,
       })
       setLoadingProgress(100)
       setResult(data)
@@ -113,6 +136,8 @@ function AtsChecker() {
     setResult(null)
     setShowResults(false)
     setResumeFile(null)
+    setResumeText(null)
+    setFromBuilder(false)
     setJobDescription('')
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
@@ -259,6 +284,11 @@ function AtsChecker() {
                         </p>
                         <p className="text-xs text-gray-500 mt-0.5 font-mono">
                           {(resumeFile.size / 1024).toFixed(1)} KB
+                          {fromBuilder && (
+                            <span className="ml-2 text-violet-600 font-sans font-semibold">
+                              · from your resume (text)
+                            </span>
+                          )}
                         </p>
                       </div>
                       <button

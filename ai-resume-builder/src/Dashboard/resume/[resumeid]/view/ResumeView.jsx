@@ -6,6 +6,7 @@ import { ResumeInfoContext } from '@/context/ResumeContext'
 import GlobalApis from '../../../../../service/GlobalApis'
 import { Button } from '@/components/ui/button'
 import { downloadResumePdf, getSafeFileName } from '@/lib/downloadResumePdf'
+import { resumeToPlainText, resumeToTextFile } from '@/lib/resumeToPlainText'
 import { toast } from 'sonner'
 import { normalizeResume } from '@/lib/normalizeResume'
 
@@ -32,6 +33,15 @@ function ResumeView() {
       })
       .finally(() => setLoading(false))
   }, [resumeid])
+
+  const handleCheckAts = useCallback(() => {
+    if (!resumeInfo) return
+    const text = resumeToPlainText(resumeInfo)
+    const file = resumeToTextFile(resumeInfo, resumeInfo.title || 'resume')
+    navigate('/ats-checker', {
+      state: { resumeFile: file, resumeText: text, fromBuilder: true },
+    })
+  }, [resumeInfo, navigate])
 
   const handleDownload = useCallback(async (redirectAfter = false) => {
     const element = previewRef.current
@@ -82,7 +92,14 @@ function ResumeView() {
               Back to Dashboard
             </Button>
           </Link>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={handleCheckAts}
+            >
+              Check ATS score
+            </Button>
             <Button
               variant="outline"
               className="gap-2"

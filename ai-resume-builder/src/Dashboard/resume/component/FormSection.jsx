@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { resumeToPlainText, resumeToTextFile } from "@/lib/resumeToPlainText";
 import { Loader2 } from "lucide-react";
 import PersonalDetailForm from "./forms/PersonalDetailForm";
 import { ArrowRight, ArrowLeft } from "lucide-react";
@@ -16,6 +17,7 @@ import { getStepCount, getStepKey, getStepLabel, getTemplateMeta } from "@/data/
 import { parseFormStep, canEnableNextForStep } from "@/lib/resumeFormSteps";
 
 function FormSection() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { resumeInfo } = useContext(ResumeInfoContext);
   const templateId = resumeInfo?.templateId;
@@ -75,9 +77,26 @@ function FormSection() {
           {getStepLabel(activeStepKey)}
         </span>
       </p>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <ThemePicker />
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const text = resumeToPlainText(resumeInfo);
+              const file = resumeToTextFile(
+                resumeInfo,
+                resumeInfo?.title || "resume",
+              );
+              navigate("/ats-checker", {
+                state: { resumeFile: file, resumeText: text, fromBuilder: true },
+              });
+            }}
+          >
+            Check ATS score
+          </Button>
           {activeFormIndex > 1 && (
             <Button size="sm" onClick={() => goToStep(activeFormIndex - 1)}>
               <ArrowLeft />

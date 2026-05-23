@@ -1,5 +1,9 @@
 import { RESUME_EXPORT_CSS } from './resumeExportStyles'
 
+/** A4 capture — lower scale + JPEG keeps PDFs under ~500KB for ATS upload */
+const CAPTURE_SCALE = 1.25
+const JPEG_QUALITY = 0.82
+
 function getSafeFileName(title) {
   const base = (title || 'resume').replace(/[^\w\s-]/g, '').trim() || 'resume'
   return base.endsWith('.pdf') ? base : `${base}.pdf`
@@ -120,9 +124,9 @@ function buildIsolatedPageClone(exportPage, iframeDoc, sourceWin) {
   return clone
 }
 
-async function captureElement(html2canvas, element, win) {
+async function captureElement(html2canvas, element) {
   return html2canvas(element, {
-    scale: 2,
+    scale: CAPTURE_SCALE,
     useCORS: true,
     logging: false,
     backgroundColor: '#ffffff',
@@ -140,7 +144,7 @@ async function captureElement(html2canvas, element, win) {
   })
 }
 
-export async function downloadResumePdf(element, fileName = 'resume.pdf') {
+async function buildPdfFromElement(element) {
   if (!element) {
     throw new Error('Resume preview is not ready')
   }
@@ -199,30 +203,45 @@ export async function downloadResumePdf(element, fileName = 'resume.pdf') {
 
       await new Promise((resolve) => setTimeout(resolve, 50))
 
-      const canvas = await captureElement(html2canvas, clone, iframe.contentWindow)
+      const canvas = await captureElement(html2canvas, clone)
 
       if (!canvas.width || !canvas.height) {
         throw new Error('Could not capture resume preview')
       }
 
-      const imgData = canvas.toDataURL('image/png', 1.0)
+      const imgData = canvas.toDataURL('image/jpeg', JPEG_QUALITY)
       const imgWidth = pageWidth
       const imgHeight = (canvas.height * imgWidth) / canvas.width
 
       if (i > 0) pdf.addPage()
 
-      // One A4 page per captured page — fit to full page (fixed 297mm box)
       if (imgHeight <= pageHeight + 1) {
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight)
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST')
       } else {
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, pageHeight)
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, pageHeight, undefined, 'FAST')
       }
     }
 
-    pdf.save(getSafeFileName(fileName.replace(/\.pdf$/i, '')))
+    return pdf
   } finally {
     if (iframe.parentNode) iframe.parentNode.removeChild(iframe)
   }
+}
+
+/** Returns a compressed PDF Blob (typically 200KB–1MB). */
+export async function generateResumePdfBlob(element) {
+  const pdf = await buildPdfFromElement(element)
+  return pdf.output('blob')
+}
+
+export async function downloadResumePdf(element, fileName = 'resume.pdf') {
+  const blob = await generateResumePdfBlob(element)
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = getSafeFileName(fileName.replace(/\.pdf$/i, ''))
+  link.click()
+  URL.revokeObjectURL(url)
 }
 
 export { getSafeFileName }
