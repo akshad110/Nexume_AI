@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { analyzeResumeWithAts } from '@/service/atsApi'
+import { extractResumeFileText } from '@/lib/extractResumeFileText'
 import { parseAtsAnalysis } from '@/lib/parseAtsAnalysis'
 import AtsScoreCard from '@/components/ats/AtsScoreCard'
 import AtsResultSection from '@/components/ats/AtsResultSection'
@@ -125,10 +126,24 @@ function AtsChecker() {
     }, 2200)
 
     try {
+      let textPayload = resumeText?.trim() || ''
+
+      if (!textPayload && resumeFile) {
+        textPayload = await extractResumeFileText(resumeFile)
+      }
+
+      if (!textPayload) {
+        toast.error(
+          'Could not read your resume. Re-download from Nexume or use Check ATS from the resume editor.',
+        )
+        setLoading(false)
+        setLoadingProgress(0)
+        return
+      }
+
       const data = await analyzeResumeWithAts({
         jobDescription: jobDescription.trim(),
-        resumeFile: resumeText ? undefined : resumeFile,
-        resumeText: resumeText || undefined,
+        resumeText: textPayload,
       })
       setLoadingProgress(100)
       setResult(data)

@@ -16,8 +16,8 @@ export async function analyzeResumeWithAts({
   const formData = new FormData()
   formData.append('job_description', jobDescription)
 
-  if (resumeText) {
-    formData.append('resume_text', resumeText)
+  if (resumeText?.trim()) {
+    formData.append('resume_text', resumeText.trim())
   } else if (resumeFile) {
     formData.append('resume', resumeFile)
   } else {
