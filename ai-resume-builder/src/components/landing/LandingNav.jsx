@@ -7,6 +7,7 @@ const LINKS = [
   { label: 'Features', href: '#features' },
   { label: 'How it works', href: '#process' },
   { label: 'ATS scan', to: '/ats-checker' },
+  { label: 'Dashboard', to: '/dashboard' },
 ]
 
 function LandingNav() {
@@ -41,15 +42,7 @@ function LandingNav() {
 
         <div className="flex items-center gap-2 shrink-0">
           {isSignedIn ? (
-            <>
-              <Link
-                to="/dashboard"
-                className="hidden sm:inline text-sm font-semibold text-gray-700 hover:text-gray-900 px-3 py-2"
-              >
-                Dashboard
-              </Link>
-              <UserButton />
-            </>
+            <UserButton />
           ) : (
             <Link
               to="/auth/sign-in"
