@@ -44,17 +44,16 @@ function ResumeView() {
   }, [resumeInfo, navigate])
 
   const handleDownload = useCallback(async (redirectAfter = false) => {
-    const element = previewRef.current
-    if (!element) {
-      toast.error('Resume preview is not ready yet')
+    if (!resumeInfo) {
+      toast.error('Resume is not loaded yet')
       return
     }
 
     setDownloading(true)
     try {
       const fileName = getSafeFileName(resumeInfo?.title)
-      await downloadResumePdf(element, fileName)
-      toast.success('Resume downloaded!')
+      await downloadResumePdf(resumeInfo, fileName)
+      toast.success('Resume downloaded (ATS-friendly PDF)')
       if (redirectAfter) {
         navigate('/dashboard', { replace: true })
       }

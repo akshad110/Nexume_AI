@@ -1,13 +1,97 @@
+import { resumeToPlainText } from './resumeToPlainText'
 import { RESUME_EXPORT_CSS } from './resumeExportStyles'
 
-/** A4 capture — lower scale + JPEG keeps PDFs under ~500KB for ATS upload */
+/** Visual capture settings (print layout — not ideal for ATS upload) */
 const CAPTURE_SCALE = 1.25
 const JPEG_QUALITY = 0.82
 
 function getSafeFileName(title) {
-  const base = (title || 'resume').replace(/[^\w\s-]/g, '').trim() || 'resume'
+  const base = (title || 'resume').replace(/[^\w\s.-]/g, '').trim() || 'resume'
   return base.endsWith('.pdf') ? base : `${base}.pdf`
 }
+
+/** Build ATS-friendly PDF with selectable text (small file, works in all analyzers). */
+export async function buildTextPdfFromResume(resume) {
+  const text = resumeToPlainText(resume)
+  if (!text.trim()) {
+    throw new Error('Resume has no content to export')
+  }
+
+  const { jsPDF } = await import('jspdf')
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+
+  const margin = 14
+  const pageHeight = pdf.internal.pageSize.getHeight()
+  const maxWidth = pdf.internal.pageSize.getWidth() - margin * 2
+  let y = margin
+  const bodyLineHeight = 5
+  const sectionLineHeight = 6
+
+  const ensureSpace = (needed) => {
+    if (y + needed > pageHeight - margin) {
+      pdf.addPage()
+      y = margin
+    }
+  }
+
+  const writeLines = (lines, { bold = false, size = 11 } = {}) => {
+    pdf.setFont('helvetica', bold ? 'bold' : 'normal')
+    pdf.setFontSize(size)
+    const lh = bold ? sectionLineHeight : bodyLineHeight
+
+    for (const line of lines) {
+      ensureSpace(lh)
+      pdf.text(line, margin, y)
+      y += lh
+    }
+  }
+
+  const paragraphs = text.split('\n')
+
+  for (const raw of paragraphs) {
+    const para = raw.trim()
+    if (!para) {
+      y += 2
+      continue
+    }
+
+    const isSection =
+      para.length < 40 &&
+      para === para.toUpperCase() &&
+      /^[A-Z][A-Z\s&]+$/.test(para)
+
+    if (isSection) {
+      ensureSpace(sectionLineHeight + 2)
+      y += 2
+      writeLines(pdf.splitTextToSize(para, maxWidth), { bold: true, size: 12 })
+      y += 1
+    } else {
+      writeLines(pdf.splitTextToSize(para, maxWidth))
+    }
+  }
+
+  return pdf
+}
+
+export async function generateResumePdfBlobFromData(resume) {
+  const pdf = await buildTextPdfFromResume(resume)
+  return pdf.output('blob', { type: 'application/pdf' })
+}
+
+/** Default download — text PDF for ATS compatibility (~20–80 KB). */
+export async function downloadResumePdf(resume, fileName = 'resume.pdf') {
+  const pdf = await buildTextPdfFromResume(resume)
+  pdf.save(getSafeFileName(fileName.replace(/\.pdf$/i, '')))
+}
+
+/** PDF File object with real text layer for ATS upload. */
+export async function resumeToPdfFile(resume, fileName = 'resume.pdf') {
+  const blob = await generateResumePdfBlobFromData(resume)
+  const safeName = getSafeFileName(fileName.replace(/\.pdf$/i, ''))
+  return new File([blob], safeName, { type: 'application/pdf' })
+}
+
+// --- Visual PDF (image-based, for print preview fidelity only) ---
 
 const SAFE_CLASSES = new Set([
   'resume-export',
@@ -94,7 +178,6 @@ function sanitizeElementTree(root) {
       const kept = [...el.classList].filter((c) => SAFE_CLASSES.has(c))
       el.className = kept.join(' ')
     }
-
     if (el.style?.length) {
       for (let i = 0; i < el.style.length; i++) {
         const prop = el.style[i]
@@ -104,7 +187,6 @@ function sanitizeElementTree(root) {
         }
       }
     }
-
     Array.from(el.children || []).forEach(walk)
   }
   walk(root)
@@ -144,13 +226,12 @@ async function captureElement(html2canvas, element) {
   })
 }
 
-async function buildPdfFromElement(element) {
+async function buildVisualPdfFromElement(element) {
   if (!element) {
     throw new Error('Resume preview is not ready')
   }
 
   const pageElements = element.querySelectorAll('[data-resume-page]')
-
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
     import('html2canvas'),
     import('jspdf'),
@@ -200,48 +281,31 @@ async function buildPdfFromElement(element) {
         iframeDoc,
         window,
       )
-
       await new Promise((resolve) => setTimeout(resolve, 50))
-
       const canvas = await captureElement(html2canvas, clone)
-
       if (!canvas.width || !canvas.height) {
         throw new Error('Could not capture resume preview')
       }
-
       const imgData = canvas.toDataURL('image/jpeg', JPEG_QUALITY)
       const imgWidth = pageWidth
       const imgHeight = (canvas.height * imgWidth) / canvas.width
-
       if (i > 0) pdf.addPage()
-
       if (imgHeight <= pageHeight + 1) {
         pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST')
       } else {
         pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, pageHeight, undefined, 'FAST')
       }
     }
-
     return pdf
   } finally {
     if (iframe.parentNode) iframe.parentNode.removeChild(iframe)
   }
 }
 
-/** Returns a compressed PDF Blob (typically 200KB–1MB). */
-export async function generateResumePdfBlob(element) {
-  const pdf = await buildPdfFromElement(element)
-  return pdf.output('blob')
-}
-
-export async function downloadResumePdf(element, fileName = 'resume.pdf') {
-  const blob = await generateResumePdfBlob(element)
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = getSafeFileName(fileName.replace(/\.pdf$/i, ''))
-  link.click()
-  URL.revokeObjectURL(url)
+/** Image-based PDF matching on-screen design (may not parse in some ATS tools). */
+export async function downloadStyledResumePdf(element, fileName = 'resume.pdf') {
+  const pdf = await buildVisualPdfFromElement(element)
+  pdf.save(getSafeFileName(fileName.replace(/\.pdf$/i, '')))
 }
 
 export { getSafeFileName }

@@ -20,7 +20,7 @@ const MAX_FILE_MB = 10
 
 const TIPS = [
   { title: 'Paste the full job ad', desc: 'Include requirements & nice-to-haves' },
-  { title: 'TXT works best', desc: 'Use “Check ATS” from your resume for instant text export' },
+  { title: 'Use our PDF download', desc: 'Text-based PDFs work in ATS tools (not image-only)' },
   { title: 'Under a minute', desc: 'First run may take longer on cold start' },
 ]
 
@@ -49,14 +49,25 @@ function AtsChecker() {
     'Building your report…',
   ]
 
+  const isAcceptedResumeFile = (file) => {
+    if (!file) return false
+    if (ACCEPTED_TYPES[file.type]) return true
+    const name = (file.name || '').toLowerCase()
+    return name.endsWith('.pdf') || name.endsWith('.txt')
+  }
+
   const validateFile = (file) => {
     if (!file) return false
-    if (!ACCEPTED_TYPES[file.type]) {
+    if (!isAcceptedResumeFile(file)) {
       toast.error('Please upload a PDF or TXT file')
       return false
     }
-    if (file.size > MAX_FILE_MB * 1024 * 1024) {
-      toast.error(`File must be under ${MAX_FILE_MB}MB`)
+    if (!file.size || file.size > MAX_FILE_MB * 1024 * 1024) {
+      toast.error(
+        file.size
+          ? `File must be under ${MAX_FILE_MB}MB`
+          : 'Could not read file size — try saving the PDF again or use TXT',
+      )
       return false
     }
     return true
@@ -275,7 +286,10 @@ function AtsChecker() {
                     <div className="flex items-center gap-4 rounded-2xl border border-violet-200/60 bg-gradient-to-r from-violet-50/50 to-white p-4">
                       <div className="shrink-0 h-12 w-10 rounded-lg border border-gray-200 bg-white flex items-center justify-center shadow-sm">
                         <span className="text-[10px] font-black text-violet-700">
-                          {ACCEPTED_TYPES[resumeFile.type]}
+                          {ACCEPTED_TYPES[resumeFile.type] ||
+                            (resumeFile.name?.toLowerCase().endsWith('.pdf')
+                              ? 'PDF'
+                              : 'TXT')}
                         </span>
                       </div>
                       <div className="min-w-0 flex-1">
