@@ -7,19 +7,49 @@ import ResumeItem from './components/ResumeItem'
 import { Loader2 } from 'lucide-react'
 
 function Dashboard() {
-  const { user } = useUser()
+  const { user, isLoaded } = useUser()
   const [resumeList, setResumeList] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (user) GetUserResumesList()
-  }, [user])
+    if (!isLoaded) return
+    if (!user?.primaryEmailAddress?.emailAddress) {
+      setLoading(false)
+      return
+    }
+    GetUserResumesList()
+  }, [isLoaded, user])
 
   const GetUserResumesList = () => {
+    const email = user?.primaryEmailAddress?.emailAddress
+    if (!email) return
+
     setLoading(true)
-    GlobalApis.GetUserResume(user?.primaryEmailAddress?.emailAddress)
+    setError(null)
+    GlobalApis.GetUserResume(email)
       .then((res) => {
-        setResumeList(res.data.data || [])
+        setResumeList(res.data?.data || [])
+      })
+      .catch((err) => {
+        const status = err?.response?.status
+        const apiBase = import.meta.env.VITE_STRAPI_API_URL || '(not set)'
+        if (status === 404) {
+          setError(
+            `API returned 404. Check VITE_STRAPI_API_URL on Render (must end with /api). Current: ${apiBase}`,
+          )
+        } else if (status === 401 || status === 403) {
+          setError(
+            'Strapi rejected the API token. Create a new token in Strapi admin and update VITE_STRAPI_API_KEY, then redeploy.',
+          )
+        } else if (!import.meta.env.VITE_STRAPI_API_URL) {
+          setError(
+            'VITE_STRAPI_API_URL is missing. Add it in Render → Environment, then Manual Deploy the frontend.',
+          )
+        } else {
+          setError(err?.message || 'Could not load resumes. Try again.')
+        }
+        setResumeList([])
       })
       .finally(() => setLoading(false))
   }
@@ -58,6 +88,11 @@ function Dashboard() {
       </div>
 
       <div className="mx-auto max-w-6xl px-5 py-6">
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            {error}
+          </div>
+        )}
         {loading ? (
           <div className="flex items-center justify-center py-24 text-gray-500 gap-2">
             <Loader2 className="h-5 w-5 animate-spin" />
