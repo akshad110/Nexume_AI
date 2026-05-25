@@ -489,6 +489,7 @@ export interface ApiUserResumeUserResume extends Struct.CollectionTypeSchema {
   };
   attributes: {
     address: Schema.Attribute.String;
+    bodyFontSize: Schema.Attribute.Integer;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -497,8 +498,11 @@ export interface ApiUserResumeUserResume extends Struct.CollectionTypeSchema {
     email: Schema.Attribute.String;
     experience: Schema.Attribute.JSON;
     firstName: Schema.Attribute.String;
+    github: Schema.Attribute.String;
+    headingFontSize: Schema.Attribute.Integer;
     jobTitle: Schema.Attribute.String;
     lastName: Schema.Attribute.String;
+    linkedin: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -510,6 +514,7 @@ export interface ApiUserResumeUserResume extends Struct.CollectionTypeSchema {
     projects: Schema.Attribute.JSON;
     publishedAt: Schema.Attribute.DateTime;
     resumeid: Schema.Attribute.String;
+    sectionOrder: Schema.Attribute.JSON;
     sectionVisibility: Schema.Attribute.JSON;
     skills: Schema.Attribute.Component<'skills.skills', true>;
     summery: Schema.Attribute.Text;

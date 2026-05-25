@@ -61,10 +61,22 @@
     "themeColor": {
       "type": "string"
     },
+    "headingFontSize": {
+      "type": "integer"
+    },
+    "bodyFontSize": {
+      "type": "integer"
+    },
     "templateId": {
       "type": "string"
     },
     "website": {
+      "type": "string"
+    },
+    "linkedin": {
+      "type": "string"
+    },
+    "github": {
       "type": "string"
     },
     "projects": {
@@ -77,6 +89,9 @@
       "type": "json"
     },
     "sectionVisibility": {
+      "type": "json"
+    },
+    "sectionOrder": {
       "type": "json"
     }
   }

@@ -5,6 +5,9 @@ import { TEMPLATE_IDS } from '@/data/resumeTemplates'
 function StaticTemplateCard({ template, selected, onSelect }) {
   const isProfessional = template.id === TEMPLATE_IDS.PROFESSIONAL
   const isModern = template.id === TEMPLATE_IDS.MODERN
+  const isDataScience = template.id === TEMPLATE_IDS.DATA_SCIENCE
+  const isDeveloper = template.id === TEMPLATE_IDS.DEVELOPER
+  const isSidebar = template.id === TEMPLATE_IDS.SIDEBAR
 
   return (
     <button
@@ -62,6 +65,45 @@ function StaticTemplateCard({ template, selected, onSelect }) {
               Programming Skills
             </div>
             <div>Languages: Python, Java, SQL...</div>
+          </div>
+        ) : isDataScience ? (
+          <div>
+            <div className="font-bold text-[9px] mb-1" style={{ color: template.previewAccent }}>
+              Timmy Chan
+            </div>
+            <div className="text-[6px] mb-1">Data Scientist</div>
+            <div className="font-bold uppercase text-[7px] mb-0.5" style={{ color: template.previewAccent }}>
+              Objective
+            </div>
+            <div className="font-bold uppercase text-[7px] mb-0.5" style={{ color: template.previewAccent }}>
+              Skills · Experience
+            </div>
+          </div>
+        ) : isDeveloper ? (
+          <div>
+            <div className="flex justify-between font-bold text-[8px]">
+              <span>Jane Doe</span>
+              <span className="font-normal text-[6px]">Location</span>
+            </div>
+            <div className="font-bold uppercase text-[7px] mt-1" style={{ color: template.previewAccent }}>
+              Technical Skills
+            </div>
+            <div className="text-[6px]">Languages: JS, PHP...</div>
+            <div className="font-bold uppercase text-[7px] mt-1" style={{ color: template.previewAccent }}>
+              Experience
+            </div>
+          </div>
+        ) : isSidebar ? (
+          <div className="flex gap-1 h-full">
+            <div className="w-[32%] border-r border-gray-300 pr-1">
+              <div className="font-bold text-[7px]">Rahul</div>
+              <div className="text-[5px] font-bold mt-1">Skills</div>
+              <div className="text-[5px]">Python...</div>
+            </div>
+            <div className="flex-1 pl-0.5">
+              <div className="text-[5px] text-right">Email · Phone</div>
+              <div className="font-bold text-[6px] mt-1">Experience</div>
+            </div>
           </div>
         ) : isModern ? (
           <div>

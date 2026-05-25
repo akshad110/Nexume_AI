@@ -1,5 +1,6 @@
 import React from 'react'
 import { useUser } from '@clerk/react'
+import { BackgroundRippleEffect } from '@/components/ui/background-ripple-effect'
 import LandingNav from '@/components/landing/LandingNav'
 import LandingHero from '@/components/landing/LandingHero'
 import LandingTrust from '@/components/landing/LandingTrust'
@@ -14,16 +15,19 @@ function Home() {
   const startHref = isSignedIn ? '/dashboard' : '/auth/sign-in'
 
   return (
-    <div className="min-h-screen bg-[#fafafa] flex flex-col overflow-x-hidden">
-      <LandingNav />
+    <div className="flex min-h-screen flex-col overflow-x-clip bg-[#fafafa]">
+      <div className="relative flex min-h-screen flex-col overflow-hidden bg-white">
+        <BackgroundRippleEffect cols={36} className="z-[1]" />
+        <LandingNav />
+        <LandingHero startHref={startHref} isSignedIn={isSignedIn} />
+      </div>
 
       <main className="flex-1">
-        <LandingHero startHref={startHref} isSignedIn={isSignedIn} />
         <LandingTrust />
         <LandingFeatureTabs startHref={startHref} />
         <LandingProcess />
         <LandingStats />
-        <LandingDarkCta startHref={startHref} isSignedIn={isSignedIn} />
+        <LandingDarkCta />
       </main>
 
       <LandingFooter />

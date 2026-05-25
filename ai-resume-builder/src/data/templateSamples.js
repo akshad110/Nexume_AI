@@ -1,4 +1,8 @@
-import { TEMPLATE_IDS } from './resumeTemplates'
+import { TEMPLATE_IDS, getDefaultSectionOrder } from './resumeTemplates'
+import {
+  DEFAULT_BODY_FONT_SIZE,
+  DEFAULT_HEADING_FONT_SIZE,
+} from './resumeTypography'
 
 /** Sample data for template picker previews (LaTeX professional layout) */
 const professionalSample = {
@@ -155,10 +159,151 @@ const modernSample = {
   ],
 }
 
+const dataScienceSample = {
+  templateId: TEMPLATE_IDS.DATA_SCIENCE,
+  themeColor: '#2563eb',
+  firstName: 'Timmy',
+  lastName: 'Chan',
+  jobTitle: 'Data Scientist / Junior Developer',
+  email: 'timmy@email.com',
+  phone: '(555) 123-4567',
+  address: 'San Francisco, CA',
+  linkedin: 'linkedin.com/in/timmy-l-chan',
+  github: 'github.com/TimmyChan',
+  website: 'https://mathtodata.com',
+  summery:
+    'Data scientist with experience in Python, SQL, and ML pipelines. Seeking roles in analytics and product data.',
+  skills: [
+    { title: 'Languages', skills: ['Python', 'R', 'SQL'] },
+    { title: 'ML', skills: ['scikit-learn', 'TensorFlow', 'Pandas'] },
+    { title: 'Tools', skills: ['Jupyter', 'Git', 'Docker'] },
+  ],
+  experience: professionalSample.experience.slice(0, 2),
+  education: professionalSample.education.slice(0, 1),
+  customSections: [
+    {
+      title: 'Activities',
+      content: '<ul><li>Open source contributor</li><li>Kaggle competitions</li></ul>',
+    },
+  ],
+}
+
+const developerSample = {
+  templateId: TEMPLATE_IDS.DEVELOPER,
+  themeColor: '#2563eb',
+  firstName: 'Jane',
+  lastName: 'Doe',
+  jobTitle: 'Full Stack Developer',
+  email: 'jane.doe@email.com',
+  phone: '5555555555',
+  address: 'Anycity, Anystate',
+  linkedin: 'linkedin.com/in/jane-doe',
+  github: 'github.com/jane-doe',
+  website: 'jane-doe.com',
+  summery:
+    'Highly skilled web developer with 3+ years of experience in React, Node.js, and PHP. Experience with REST APIs and MVC frameworks.',
+  skills: [
+    { title: 'Languages', skills: ['JavaScript', 'PHP', 'Java', 'HTML', 'CSS'] },
+    { title: 'Frameworks', skills: ['React.js', 'Angular', 'Express', 'Node.js'] },
+    { title: 'Databases', skills: ['MongoDB', 'PostgreSQL'] },
+  ],
+  experience: [
+    {
+      title: 'Web Developer',
+      companyName: 'Anycompany',
+      city: 'Remote',
+      state: 'Anystate',
+      startDate: 'Apr 2022',
+      endDate: 'Present',
+      currenlyworking: true,
+      workSummery:
+        '<ul><li>Designed dynamic websites using HTML, CSS, JavaScript, and PHP</li><li>Improved website performance by 55%</li></ul>',
+    },
+  ],
+  education: [
+    {
+      universityName: 'University of Anystate',
+      degree: 'B.S. Computer Science',
+      major: 'Anycity',
+      startDate: 'Jan 2016',
+      endDate: 'Dec 2020',
+    },
+  ],
+  projects: [
+    {
+      name: 'Project 1',
+      techUsed: 'React.js, Redux, PHP, MySQL',
+      description: 'Clean modern website with responsive design.',
+    },
+  ],
+  customSections: [
+    {
+      title: 'Certifications',
+      content: '<ul><li>AWS Certified Developer</li></ul>',
+    },
+  ],
+}
+
+const sidebarSample = {
+  templateId: TEMPLATE_IDS.SIDEBAR,
+  themeColor: '#1f2937',
+  firstName: 'Rahul',
+  lastName: 'Chauhan',
+  jobTitle: 'B.Tech CSE — Final Year',
+  email: 'rahul@email.com',
+  phone: '+91-8449368522',
+  address: 'NIT Srinagar, India',
+  linkedin: 'linkedin.com/in/rahulworld',
+  github: 'github.com/rahulworld',
+  website: 'rahulchauhan.net',
+  summery: 'Computer Science student with internship experience in ML and open source.',
+  skills: [
+    { title: 'Languages', skills: ['C/C++', 'Java', 'Python', 'JavaScript'] },
+    { title: 'Framework', skills: ['Flask', 'Node.js', 'React'] },
+    { title: 'Databases', skills: ['MySQL', 'PostgreSQL', 'MongoDB'] },
+  ],
+  education: [
+    {
+      universityName: 'NIT Srinagar',
+      degree: 'B.Tech in CSE',
+      major: '',
+      startDate: '2018',
+      endDate: '2024',
+    },
+  ],
+  experience: [
+    {
+      title: 'GSoC Student Developer',
+      companyName: 'OSGeo',
+      city: '',
+      state: '',
+      startDate: '2018',
+      endDate: '2019',
+      workSummery: '<p>Unit of measure conversion in istSOS3.</p>',
+    },
+  ],
+  projects: [
+    {
+      name: 'Digital Certificate Dapp',
+      techUsed: 'Blockchain, Web3JS',
+      description: 'Dapp to issue and verify certificates on Ethereum.',
+    },
+  ],
+  customSections: [
+    {
+      title: 'Achievements',
+      content: '<ul><li>Digital India — Grand Prize Winner</li></ul>',
+    },
+  ],
+}
+
 export const TEMPLATE_SAMPLE_DATA = {
   [TEMPLATE_IDS.CLASSIC]: classicSample,
   [TEMPLATE_IDS.PROFESSIONAL]: professionalSample,
   [TEMPLATE_IDS.MODERN]: modernSample,
+  [TEMPLATE_IDS.DATA_SCIENCE]: dataScienceSample,
+  [TEMPLATE_IDS.DEVELOPER]: developerSample,
+  [TEMPLATE_IDS.SIDEBAR]: sidebarSample,
 }
 
 export function getTemplateSample(templateId) {
@@ -183,6 +328,8 @@ export function getInitialResumeData(templateId, { title, resumeid, userEmail, u
     phone: '',
     email: '',
     website: '',
+    linkedin: '',
+    github: '',
     summery: '',
     education: [],
     experience: [],
@@ -190,25 +337,25 @@ export function getInitialResumeData(templateId, { title, resumeid, userEmail, u
     skills: [],
     programmingSkills: { languages: '', technologies: '' },
     customSections: [],
-    sectionVisibility: { experience: true },
+    sectionOrder: getDefaultSectionOrder(templateId),
+    sectionVisibility: Object.fromEntries(
+      getDefaultSectionOrder(templateId).map((id) => [id, true]),
+    ),
+    headingFontSize: DEFAULT_HEADING_FONT_SIZE,
+    bodyFontSize: DEFAULT_BODY_FONT_SIZE,
   }
 
-  if (templateId === TEMPLATE_IDS.PROFESSIONAL) {
-    return {
-      ...base,
-      themeColor: '#171717',
-    }
-  }
-
-  if (templateId === TEMPLATE_IDS.MODERN) {
-    return {
-      ...base,
-      themeColor: '#0f172a',
-    }
+  const themeByTemplate = {
+    [TEMPLATE_IDS.PROFESSIONAL]: '#171717',
+    [TEMPLATE_IDS.MODERN]: '#0f172a',
+    [TEMPLATE_IDS.DATA_SCIENCE]: '#2563eb',
+    [TEMPLATE_IDS.DEVELOPER]: '#2563eb',
+    [TEMPLATE_IDS.SIDEBAR]: '#1f2937',
+    [TEMPLATE_IDS.CLASSIC]: '#7c3aed',
   }
 
   return {
     ...base,
-    themeColor: '#7c3aed',
+    themeColor: themeByTemplate[templateId] || themeByTemplate[TEMPLATE_IDS.CLASSIC],
   }
 }

@@ -1,12 +1,12 @@
 import React from 'react'
-import { PROFESSIONAL_FONT } from '@/lib/resumeExportStyles'
+import RichHtmlContent from '../shared/RichHtmlContent'
 
-function ProfessionalProjects({ projects, themeColor }) {
+function ProfessionalProjects({ projects, themeColor, fonts }) {
   const list = (projects ?? []).filter((p) => p?.name || p?.description)
   if (!list.length) return null
 
   return (
-    <div style={{ fontSize: PROFESSIONAL_FONT.body, lineHeight: 1.45 }}>
+    <div style={{ fontSize: fonts.body, lineHeight: 1.45 }}>
       {list.map((item, index) => (
         <div
           key={index}
@@ -14,7 +14,14 @@ function ProfessionalProjects({ projects, themeColor }) {
             marginBottom: index < list.length - 1 ? '10px' : 0,
           }}
         >
-          <p style={{ margin: '0 0 2px 0', fontWeight: 700, color: themeColor }}>
+          <p
+            style={{
+              margin: '0 0 2px 0',
+              fontWeight: 700,
+              fontSize: fonts.section,
+              color: themeColor,
+            }}
+          >
             {item.name}
           </p>
           {item.techUsed && (
@@ -22,21 +29,20 @@ function ProfessionalProjects({ projects, themeColor }) {
               style={{
                 margin: '0 0 4px 0',
                 fontStyle: 'italic',
-                fontSize: PROFESSIONAL_FONT.small,
+                fontSize: fonts.small,
               }}
             >
               Technologies: {item.techUsed}
             </p>
           )}
           {item.description && (
-            <div
-              className="pro-exp-html"
+            <RichHtmlContent
+              html={item.description}
               style={{
                 marginTop: '4px',
-                fontSize: PROFESSIONAL_FONT.small,
+                fontSize: fonts.body,
                 fontStyle: 'normal',
               }}
-              dangerouslySetInnerHTML={{ __html: item.description }}
             />
           )}
         </div>

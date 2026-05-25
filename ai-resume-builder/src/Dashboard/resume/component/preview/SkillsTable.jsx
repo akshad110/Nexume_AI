@@ -12,6 +12,7 @@ function SkillsTable({ skills, themeColor = '#171717', fontSize = '10px' }) {
       style={{
         width: '100%',
         borderCollapse: 'collapse',
+        tableLayout: 'auto',
         fontSize,
         lineHeight: 1.45,
       }}
@@ -23,15 +24,22 @@ function SkillsTable({ skills, themeColor = '#171717', fontSize = '10px' }) {
               style={{
                 fontWeight: 700,
                 verticalAlign: 'top',
-                width: '28%',
-                padding: '2px 8px 4px 0',
+                width: '1%',
+                whiteSpace: 'nowrap',
+                padding: '2px 10px 4px 0',
                 color: themeColor,
               }}
             >
               {item.title}
             </td>
-            <td style={{ verticalAlign: 'top', padding: '2px 0 4px 0' }}>
-              {(item.skills ?? []).join(', ')}
+            <td
+              style={{
+                verticalAlign: 'top',
+                width: '99%',
+                padding: '2px 0 4px 0',
+              }}
+            >
+              {(item.skills ?? []).join('; ')}
             </td>
           </tr>
         ))}

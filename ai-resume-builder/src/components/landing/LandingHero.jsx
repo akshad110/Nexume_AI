@@ -1,65 +1,86 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { MockResumeEditor } from './mock/LandingMocks'
 import ScrollReveal from './ScrollReveal'
 import { useCountUp } from '@/hooks/useCountUp'
 import { useScrollReveal } from '@/hooks/useScrollReveal'
+import UserAvatars, { HERO_SOCIAL_USERS } from '@/components/ui/user-avatars'
+import { cn } from '@/lib/utils'
+import TextRoll from '@/components/ui/text-roll'
+
+const HERO_HEADING_CLASS =
+  'cursor-pointer max-w-full font-extrabold leading-[1.15] tracking-tight whitespace-nowrap text-[clamp(1.1rem,3.9vw,3.4rem)] text-gray-900 md:text-5xl lg:text-[3.4rem]'
+
+const HERO_GRADIENT_CLASS =
+  'cursor-pointer max-w-full font-extrabold leading-[1.15] tracking-tight whitespace-nowrap text-[clamp(1.1rem,3.9vw,3.4rem)] md:text-5xl lg:text-[3.4rem]'
 
 function LandingHero({ startHref, isSignedIn }) {
-  const avatars = ['AK', 'JR', 'MS', 'PL', 'TC']
   const { ref: countRef, visible: countVisible } = useScrollReveal({ threshold: 0.5 })
   const resumeCount = useCountUp(2000, { enabled: countVisible, duration: 2200 })
 
   return (
-    <section className="relative overflow-hidden pt-4 pb-16 md:pb-24">
-      <div
-        className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[min(900px,120vw)] h-[500px] rounded-full opacity-60 blur-3xl"
-        style={{
-          background:
-            'radial-gradient(ellipse at center, rgba(56, 189, 248, 0.35) 0%, rgba(159, 91, 255, 0.2) 45%, transparent 70%)',
-        }}
-      />
-
-      <div className="relative mx-auto max-w-6xl px-5">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-          <div className="text-center lg:text-left">
+    <section className="relative z-10 flex flex-1 flex-col justify-center overflow-x-hidden pb-12 pt-4 sm:pb-16 md:pb-24 md:pt-0">
+      <div className="mx-auto w-full min-w-0 max-w-6xl px-4 sm:px-5">
+        <div className="grid min-w-0 items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.9fr)] lg:gap-12 xl:gap-16">
+          <div className="relative z-10 min-w-0 text-center lg:pr-4 lg:text-left xl:pr-8">
             <ScrollReveal delay={0}>
-            <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/80 backdrop-blur px-4 py-1.5 text-sm shadow-sm mb-6">
-              <span className="text-amber-500 font-bold">★★★★★</span>
-              <span className="text-gray-600">
-                <strong className="text-gray-900">4.9</strong> rating · trusted by
-                job seekers
+            <div className="mx-auto mb-5 inline-flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border border-gray-200 bg-white/80 px-3 py-1.5 text-xs shadow-sm backdrop-blur sm:mb-6 sm:px-4 sm:text-sm lg:mx-0 lg:justify-start">
+              <span className="shrink-0 font-bold text-amber-500">★★★★★</span>
+              <span className="text-center text-gray-600 lg:text-left">
+                <strong className="text-gray-900">4.9</strong> rating · trusted by job
+                seekers
               </span>
             </div>
             </ScrollReveal>
 
             <ScrollReveal delay={80}>
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-extrabold text-gray-900 leading-[1.1] tracking-tight">
-              The resume platform for{' '}
-              <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 bg-clip-text text-transparent">
-                serious applicants
-              </span>
+            <h1 className="sr-only">
+              The Resume platform for serious applicants
             </h1>
+            <div
+              className="mx-auto flex w-full min-w-0 max-w-full flex-col items-center gap-0.5 lg:mx-0 lg:items-start"
+              aria-hidden
+            >
+              <TextRoll
+                center
+                text="The Resume platform"
+                className={HERO_HEADING_CLASS}
+              />
+              <div className="flex w-full max-w-full flex-wrap items-baseline justify-center lg:flex-nowrap lg:justify-start">
+                <TextRoll
+                  center
+                  inline
+                  text="for serious "
+                  className={HERO_HEADING_CLASS}
+                />
+                <TextRoll
+                  center
+                  inline
+                  text="applicants"
+                  gradient
+                  className={HERO_GRADIENT_CLASS}
+                />
+              </div>
+            </div>
             </ScrollReveal>
 
             <ScrollReveal delay={160}>
-            <p className="mt-5 text-lg text-gray-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
+            <p className="mx-auto mt-4 max-w-xl break-words text-base leading-relaxed text-gray-600 sm:mt-5 sm:text-lg lg:mx-0">
               Build polished resumes, run instant ATS checks against any job post,
               and export print-perfect PDFs — without juggling five different tools.
             </p>
             </ScrollReveal>
 
             <ScrollReveal delay={240}>
-            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+            <div className="mt-6 flex w-full flex-col gap-3 sm:mt-8 sm:flex-row sm:justify-center lg:justify-start">
               <Link
                 to={startHref}
-                className="inline-flex justify-center items-center rounded-2xl bg-gray-900 text-white font-bold text-sm px-8 py-4 hover:bg-gray-800 shadow-lg shadow-gray-900/20 transition-all hover:-translate-y-0.5"
+                className="inline-flex w-full items-center justify-center rounded-2xl bg-gray-900 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-gray-900/20 transition-all hover:-translate-y-0.5 hover:bg-gray-800 sm:w-auto sm:px-8 sm:py-4"
               >
                 {isSignedIn ? 'Open workspace' : 'Start free'}
               </Link>
               <a
                 href="#features"
-                className="inline-flex justify-center items-center rounded-2xl border-2 border-gray-200 bg-white text-gray-900 font-semibold text-sm px-8 py-4 hover:border-gray-400 transition-all"
+                className="inline-flex w-full items-center justify-center rounded-2xl border-2 border-gray-200 bg-white px-6 py-3.5 text-sm font-semibold text-gray-900 transition-all hover:border-gray-400 sm:w-auto sm:px-8 sm:py-4"
               >
                 See how it works
               </a>
@@ -69,20 +90,16 @@ function LandingHero({ startHref, isSignedIn }) {
             <ScrollReveal delay={320}>
             <div
               ref={countRef}
-              className="mt-8 flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start"
+              className="mt-6 flex flex-col items-center justify-center gap-3 sm:mt-8 sm:flex-row sm:gap-4 lg:justify-start"
             >
-              <div className="flex -space-x-2">
-                {avatars.map((initials, i) => (
-                  <div
-                    key={initials}
-                    className="h-9 w-9 rounded-full border-2 border-white bg-gradient-to-br from-violet-400 to-cyan-400 flex items-center justify-center text-[10px] font-bold text-white shadow-sm"
-                    style={{ zIndex: avatars.length - i }}
-                  >
-                    {initials}
-                  </div>
-                ))}
-              </div>
-              <p className="text-sm text-gray-600">
+              <UserAvatars
+                users={HERO_SOCIAL_USERS}
+                size={36}
+                maxVisible={5}
+                overlap={55}
+                focusScale={1.15}
+              />
+              <p className="text-center text-sm text-gray-600 sm:text-left">
                 <strong className="text-gray-900 tabular-nums">
                   {resumeCount.toLocaleString()}+
                 </strong>{' '}
@@ -92,7 +109,7 @@ function LandingHero({ startHref, isSignedIn }) {
             </ScrollReveal>
 
             <ScrollReveal delay={400}>
-            <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 justify-center lg:justify-start text-sm text-gray-600">
+            <ul className="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm text-gray-600 sm:mt-8 sm:gap-x-6 lg:justify-start">
               {[
                 'Ready in minutes',
                 'No design skills needed',
@@ -107,11 +124,20 @@ function LandingHero({ startHref, isSignedIn }) {
             </ScrollReveal>
           </div>
 
-          <ScrollReveal delay={200} direction="left" className="relative lg:pl-6">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-tr from-cyan-200/40 to-violet-200/40 rounded-[2rem] blur-2xl scale-95" />
-            <div className="relative rounded-[2rem] border border-white/50 bg-white/40 backdrop-blur p-6 shadow-[0_24px_80px_-20px_rgba(99,102,241,0.35)]">
-              <MockResumeEditor />
+          <ScrollReveal
+            delay={200}
+            direction="left"
+            className="relative z-0 mt-2 w-full min-w-0 sm:mt-4 lg:mt-0 lg:pl-6 xl:pl-10"
+          >
+          <div className="relative mx-auto w-full max-w-md lg:ml-auto lg:mr-0 lg:max-w-[24rem] lg:translate-x-3 xl:max-w-[26rem] xl:translate-x-6">
+            <div className="relative bg-transparent p-0">
+              <img
+                src="/recruitment-ezgif.com-gif-maker.gif"
+                alt="Recruitment and resume search illustration"
+                className="mx-auto h-auto w-full max-w-[280px] object-contain mix-blend-screen sm:max-w-[320px] lg:max-w-full"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
           </div>
           </ScrollReveal>

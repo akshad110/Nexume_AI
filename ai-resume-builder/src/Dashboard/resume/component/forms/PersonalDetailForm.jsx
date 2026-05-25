@@ -1,13 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ResumeInfoContext } from "@/context/ResumeContext";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import GlobalApis from "../../../../../service/GlobalApis";
 import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner"
 import { isPersonalDetailComplete } from "@/lib/resumeFormSteps";
-import { isProfessionalTemplate } from "@/data/resumeTemplates";
+import { isProfessionalTemplate, isDeveloperTemplate } from "@/data/resumeTemplates";
+import { mergeProgrammingSkillsWithSocial } from "@/lib/resumeLinks";
+import { normalizeResume } from "@/lib/normalizeResume";
 
 
 function PersonalDetailForm({enableNext}) {
@@ -17,10 +19,17 @@ function PersonalDetailForm({enableNext}) {
   const [formData,setFormData]=useState();
   const [loading,setLoading]=useState(false);
   const params = useParams();
-  const showWebsite = isProfessionalTemplate(resumeInfo?.templateId);
+  const showWebsite =
+    isProfessionalTemplate(resumeInfo?.templateId) ||
+    isDeveloperTemplate(resumeInfo?.templateId);
+  const initializedFor = useRef(null);
 
   useEffect(() => {
     if (!resumeInfo) return;
+    const key = resumeInfo.documentId || params?.resumeid;
+    if (!key || initializedFor.current === key) return;
+    initializedFor.current = key;
+
     setFormData({
       firstName: resumeInfo.firstName || "",
       lastName: resumeInfo.lastName || "",
@@ -29,39 +38,66 @@ function PersonalDetailForm({enableNext}) {
       phone: resumeInfo.phone || "",
       email: resumeInfo.email || "",
       website: resumeInfo.website || "",
+      linkedin: resumeInfo.linkedin || "",
+      github: resumeInfo.github || "",
     });
     if (isPersonalDetailComplete(resumeInfo)) {
       enableNext(true);
     }
-  }, [resumeInfo]);
+  }, [resumeInfo?.documentId, params?.resumeid]);
 
   const handleInputChange = (e) => {
     enableNext(false);
     const {name,value} = e.target;
 
-    setFormData({
-        ...(formData || {}),
+    setFormData((prev) => ({
+        ...(prev || {}),
         [name]:value
-    })
-    setResumeInfo({
-        ...resumeInfo,
-        [name]:value
-    })
+    }));
+
+    setResumeInfo((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, [name]: value };
+      if (name === "linkedin" || name === "github") {
+        next.programmingSkills = mergeProgrammingSkillsWithSocial(next, {
+          linkedin: next.linkedin,
+          github: next.github,
+        });
+      }
+      return next;
+    });
   };
+
   const onSave = (e)=> {
      e.preventDefault();
      setLoading(true);
-     const data={
 
-        data:formData
-     }
-     GlobalApis.UpdateResumeInfo(params?.resumeid,data)
-     .then(res=>{
+     const payload = {
+        ...formData,
+        linkedin: formData?.linkedin?.trim() || "",
+        github: formData?.github?.trim() || "",
+        programmingSkills: mergeProgrammingSkillsWithSocial(resumeInfo, {
+          linkedin: formData?.linkedin,
+          github: formData?.github,
+        }),
+     };
+
+     GlobalApis.UpdateResumeInfo(params?.resumeid, { data: payload })
+     .then((res)=>{
+         const saved = normalizeResume(res?.data?.data || payload);
+         setResumeInfo((prev) => ({
+           ...prev,
+           ...saved,
+           linkedin: payload.linkedin,
+           github: payload.github,
+           programmingSkills: payload.programmingSkills,
+         }));
          enableNext(true);
          setLoading(false);
          toast("Details Updated");
-     },(error)=>{
+     },()=>{
         setLoading(false);
+        toast.error("Failed to save");
      })
 
   };
@@ -73,6 +109,26 @@ function PersonalDetailForm({enableNext}) {
 
       <form onSubmit={onSave}>
         <div className="grid grid-cols-2 mt-5 gap-3">
+          <div className="col-span-2">
+            <label className="text-sm">LinkedIn (optional)</label>
+            <Input
+              name="linkedin"
+              value={formData?.linkedin ?? resumeInfo?.linkedin ?? ""}
+              placeholder="linkedin.com/in/yourprofile"
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className="col-span-2">
+            <label className="text-sm">GitHub (optional)</label>
+            <Input
+              name="github"
+              value={formData?.github ?? resumeInfo?.github ?? ""}
+              placeholder="github.com/yourusername"
+              onChange={handleInputChange}
+            />
+          </div>
+
           <div>
             <label className="text-sm">First Name</label>
             <Input required name="firstName" value={formData?.firstName ?? ""} onChange={handleInputChange} />

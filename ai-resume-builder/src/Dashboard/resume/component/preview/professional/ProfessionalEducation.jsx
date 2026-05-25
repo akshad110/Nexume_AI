@@ -1,5 +1,5 @@
 import React from 'react'
-import { PROFESSIONAL_FONT, proRow } from '@/lib/resumeExportStyles'
+import { proRow } from '@/lib/resumeExportStyles'
 
 function formatDateRange(start, end) {
   if (!start && !end) return ''
@@ -7,18 +7,18 @@ function formatDateRange(start, end) {
   return start || end
 }
 
-function ProfessionalEducation({ education, themeColor }) {
+function ProfessionalEducation({ education, themeColor, fonts }) {
   return (
     <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
       {(education ?? []).map((item, index) => (
         <li
           key={index}
           style={{
-            fontSize: PROFESSIONAL_FONT.body,
+            fontSize: fonts.body,
             marginBottom: index < education.length - 1 ? '8px' : 0,
           }}
         >
-          <div style={{ ...proRow, fontWeight: 700 }}>
+          <div style={{ ...proRow, fontWeight: 700, fontSize: fonts.section }}>
             <span style={{ color: themeColor }}>{item?.universityName}</span>
             <span style={{ fontWeight: 400, flexShrink: 0, textAlign: 'right' }}>
               {item?.major || item?.degree}
@@ -27,7 +27,7 @@ function ProfessionalEducation({ education, themeColor }) {
           <div
             style={{
               ...proRow,
-              fontSize: PROFESSIONAL_FONT.small,
+              fontSize: fonts.small,
               fontStyle: 'italic',
               marginTop: '2px',
             }}
@@ -50,7 +50,7 @@ function ProfessionalEducation({ education, themeColor }) {
             <p
               style={{
                 margin: '2px 0 0 0',
-                fontSize: PROFESSIONAL_FONT.small,
+                fontSize: fonts.small,
                 fontStyle: 'normal',
               }}
             >

@@ -1,13 +1,23 @@
+import { getResumeTypography } from '@/data/resumeTypography'
+
 /** Injected during PDF capture — no Tailwind/oklch dependency */
-export const RESUME_EXPORT_CSS = `
+export function buildResumeExportCss(resumeInfo) {
+  const fonts = getResumeTypography(resumeInfo)
+  return `
   .resume-export, .resume-export * {
     box-sizing: border-box;
     color: #000000;
   }
   .resume-export {
-    font-size: 11px;
+    font-size: ${fonts.body};
     line-height: 1.35;
     background: #ffffff;
+  }
+  .resume-export h1 {
+    font-size: ${fonts.name};
+  }
+  .resume-export h2 {
+    font-size: ${fonts.section};
   }
   .resume-export h1,
   .resume-export h2,
@@ -16,11 +26,6 @@ export const RESUME_EXPORT_CSS = `
   .resume-export li,
   .resume-export span {
     color: #000000;
-  }
-  .resume-export ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
   }
   .resume-export .pro-exp-html ul {
     list-style-type: disc;
@@ -33,6 +38,7 @@ export const RESUME_EXPORT_CSS = `
     padding: 0;
   }
   .resume-export .pro-exp-html li {
+    display: list-item;
     margin-bottom: 2px;
   }
   .resume-export .pro-exp-html p {
@@ -43,8 +49,12 @@ export const RESUME_EXPORT_CSS = `
     text-decoration: underline;
   }
 `
+}
 
-/** Template 2 (Professional) — slightly larger than default export scale */
+/** @deprecated use buildResumeExportCss(resumeInfo) */
+export const RESUME_EXPORT_CSS = buildResumeExportCss({})
+
+/** Template 2 (Professional) — default scale when no resume context */
 export const PROFESSIONAL_FONT = {
   base: '12px',
   body: '11px',
@@ -53,7 +63,7 @@ export const PROFESSIONAL_FONT = {
   section: '12px',
 }
 
-/** Template 3 (Modern) — matches professional scale */
+/** Template 3 (Modern) — default scale */
 export const MODERN_FONT = {
   base: '12px',
   body: '11px',
@@ -61,6 +71,8 @@ export const MODERN_FONT = {
   name: '26px',
   section: '14px',
 }
+
+export { getResumeTypography }
 
 export const proRow = {
   display: 'flex',
@@ -70,8 +82,8 @@ export const proRow = {
   width: '100%',
 }
 
-export const proSectionTitle = (color = '#000000') => ({
-  fontSize: PROFESSIONAL_FONT.section,
+export const proSectionTitle = (color = '#000000', fonts = PROFESSIONAL_FONT) => ({
+  fontSize: fonts.section,
   fontWeight: '700',
   textTransform: 'uppercase',
   letterSpacing: '0.08em',
@@ -81,8 +93,8 @@ export const proSectionTitle = (color = '#000000') => ({
   color,
 })
 
-export const proName = (color = '#000000') => ({
-  fontSize: PROFESSIONAL_FONT.name,
+export const proName = (color = '#000000', fonts = PROFESSIONAL_FONT) => ({
+  fontSize: fonts.name,
   fontWeight: '700',
   lineHeight: 1.2,
   margin: 0,

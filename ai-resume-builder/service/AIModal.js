@@ -72,6 +72,11 @@ export function parseAIJson(text) {
 
 /** One-shot JSON generation (experience bullets, summaries, etc.). */
 export async function generateAIContent(prompt) {
+  return generateAIWithParts([{ text: prompt }]);
+}
+
+/** Text + optional inline images (base64) for multimodal prompts. */
+export async function generateAIWithParts(parts) {
   if (!apiKey) {
     throw new Error(
       "Google AI is not configured. Add VITE_GOOGLE_AI_API_KEY to .env.local or Render.",
@@ -83,9 +88,19 @@ export async function generateAIContent(prompt) {
     throw new Error("Google AI client failed to initialize.");
   }
 
+  const normalizedParts = parts.flatMap((part) => {
+    if (part.text) return [{ text: part.text }];
+    if (part.inlineData) return [{ inlineData: part.inlineData }];
+    return [];
+  });
+
+  if (!normalizedParts.length) {
+    throw new Error("No content to send to the AI model.");
+  }
+
   try {
     const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      contents: [{ role: "user", parts: normalizedParts }],
       generationConfig,
     });
     return parseAIJson(result.response.text());

@@ -1,4 +1,5 @@
 import { isExperienceEnabled, getCustomSections } from './resumeSections'
+import { getSocialLink } from './resumeLinks'
 
 /** Strip HTML tags for plain-text export (ATS-friendly). */
 export function stripHtml(html) {
@@ -23,6 +24,10 @@ export function resumeToPlainText(resume) {
   if (resume.phone) lines.push(`Phone: ${resume.phone}`)
   if (resume.address) lines.push(resume.address)
   if (resume.website) lines.push(`Website: ${resume.website}`)
+  const linkedin = getSocialLink(resume, 'linkedin')
+  const github = getSocialLink(resume, 'github')
+  if (linkedin) lines.push(`LinkedIn: ${linkedin}`)
+  if (github) lines.push(`GitHub: ${github}`)
 
   if (resume.summery) {
     lines.push('', 'SUMMARY', stripHtml(resume.summery))

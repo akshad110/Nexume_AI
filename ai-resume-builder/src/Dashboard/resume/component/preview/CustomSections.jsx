@@ -1,6 +1,7 @@
 import React from 'react'
-import { MODERN_FONT } from '@/lib/resumeExportStyles'
+import { getResumeTypography } from '@/data/resumeTypography'
 import { MODERN_SECTION_DIVIDER, classicHrStyle } from '@/lib/resumeDividerStyles'
+import RichHtmlContent from './shared/RichHtmlContent'
 
 function CustomSections({ resumeInfo, variant = 'classic' }) {
   const sections = (resumeInfo?.customSections ?? []).filter(
@@ -8,40 +9,28 @@ function CustomSections({ resumeInfo, variant = 'classic' }) {
   )
   if (!sections.length) return null
 
+  const fonts = getResumeTypography(resumeInfo)
   const accent = resumeInfo?.themeColor || '#333'
   const isModern = variant === 'modern'
 
   const headingClass = isModern
-    ? 'font-normal uppercase tracking-[0.2em] mb-2 pb-1 border-b border-gray-400'
-    : 'text-center font-bold text-sm mb-2'
+    ? 'mb-2 border-b border-gray-400 pb-1 font-normal uppercase tracking-[0.2em]'
+    : 'mb-2 text-center font-bold'
 
-  const modernHeadingStyle = isModern
-    ? { ...MODERN_SECTION_DIVIDER, fontSize: MODERN_FONT.section }
-    : undefined
+  const headingStyle = isModern
+    ? { ...MODERN_SECTION_DIVIDER, fontSize: fonts.section }
+    : { fontSize: fonts.section, color: accent }
 
   return (
     <>
       {sections.map((section, index) => (
         <div key={index} className={isModern ? 'mb-4' : 'my-6'}>
-          <h2
-            className={headingClass}
-            style={isModern ? modernHeadingStyle : { color: accent }}
-          >
+          <h2 className={headingClass} style={headingStyle}>
             {section.title}
           </h2>
-          {!isModern && (
-            <hr data-resume-hr style={classicHrStyle(accent)} />
-          )}
+          {!isModern && <hr data-resume-hr style={classicHrStyle(accent)} />}
           {section.content && (
-            <div
-              className={
-                isModern
-                  ? 'pro-exp-html [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5'
-                  : 'text-xs pro-exp-html [&_ul]:list-disc [&_ul]:ml-5 [&_ol]:list-decimal [&_ol]:ml-5'
-              }
-              style={isModern ? { fontSize: MODERN_FONT.body } : undefined}
-              dangerouslySetInnerHTML={{ __html: section.content }}
-            />
+            <RichHtmlContent html={section.content} style={{ fontSize: fonts.body }} />
           )}
         </div>
       ))}

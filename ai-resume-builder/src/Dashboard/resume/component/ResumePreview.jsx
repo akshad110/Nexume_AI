@@ -1,23 +1,26 @@
 import { ResumeInfoContext } from '@/context/ResumeContext'
 import React, { useContext } from 'react'
 import PersonalDetail from './preview/PersonalDetail'
-import Summary from './preview/Summary'
-import Experience from './preview/Experience'
-import Education from './preview/Education'
-import Skills from './preview/Skills'
-import ClassicProjects from './preview/ClassicProjects'
+import { OrderedResumeBody } from './preview/ResumeSectionBlock'
 import ProfessionalPreview from './preview/professional/ProfessionalPreview'
 import ModernPreview from './preview/modern/ModernPreview'
 import PaginatedResumePreview from './PaginatedResumePreview'
-import CustomSections from './preview/CustomSections'
+import DataSciencePreview from './preview/datascience/DataSciencePreview'
+import DeveloperPreview from './preview/developer/DeveloperPreview'
+import SidebarPreview from './preview/sidebar/SidebarPreview'
 import {
   isProfessionalTemplate,
   isModernTemplate,
+  isDataScienceTemplate,
+  isDeveloperTemplate,
+  isSidebarTemplate,
 } from '@/data/resumeTemplates'
-import { hasExperienceContent } from '@/lib/resumeSections'
+import { getResumeTypography } from '@/data/resumeTypography'
 
-/** Template 1 — sans-serif, experience → projects → education → skills */
+/** Template 1 — sans-serif, ordered body sections */
 function ClassicPreview({ resumeInfo }) {
+  const fonts = getResumeTypography(resumeInfo)
+
   return (
     <div
       className="text-black px-1"
@@ -25,18 +28,11 @@ function ClassicPreview({ resumeInfo }) {
         background: '#ffffff',
         color: '#1a1a1a',
         fontFamily: 'Helvetica, Arial, sans-serif',
-        fontSize: '11px',
+        fontSize: fonts.body,
       }}
     >
       <PersonalDetail resumeInfo={resumeInfo} />
-      {resumeInfo?.summery ? <Summary resumeInfo={resumeInfo} /> : null}
-      {hasExperienceContent(resumeInfo) && (
-        <Experience resumeInfo={resumeInfo} />
-      )}
-      <ClassicProjects resumeInfo={resumeInfo} />
-      <Education resumeInfo={resumeInfo} />
-      <Skills resumeInfo={resumeInfo} />
-      <CustomSections resumeInfo={resumeInfo} variant="classic" />
+      <OrderedResumeBody resumeInfo={resumeInfo} variant="classic" />
     </div>
   )
 }
@@ -48,6 +44,18 @@ function renderTemplateContent(resumeInfo) {
 
   if (isModernTemplate(resumeInfo?.templateId)) {
     return <ModernPreview resumeInfo={resumeInfo} />
+  }
+
+  if (isDataScienceTemplate(resumeInfo?.templateId)) {
+    return <DataSciencePreview resumeInfo={resumeInfo} />
+  }
+
+  if (isDeveloperTemplate(resumeInfo?.templateId)) {
+    return <DeveloperPreview resumeInfo={resumeInfo} />
+  }
+
+  if (isSidebarTemplate(resumeInfo?.templateId)) {
+    return <SidebarPreview resumeInfo={resumeInfo} />
   }
 
   return (

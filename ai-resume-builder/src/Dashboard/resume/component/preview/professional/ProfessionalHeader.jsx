@@ -1,7 +1,11 @@
 import React from 'react'
-import { PROFESSIONAL_FONT, proName, proRow } from '@/lib/resumeExportStyles'
+import { proName, proRow } from '@/lib/resumeExportStyles'
+import { getResumeTypography } from '@/data/resumeTypography'
+import ResumeSocialLinks from '../ResumeSocialLinks'
+import { isSocialWebsiteUrl } from '@/lib/resumeLinks'
 
 function ProfessionalHeader({ resumeInfo, themeColor }) {
+  const fonts = getResumeTypography(resumeInfo)
   const fullName = [resumeInfo?.firstName, resumeInfo?.lastName]
     .filter(Boolean)
     .join(' ')
@@ -11,7 +15,7 @@ function ProfessionalHeader({ resumeInfo, themeColor }) {
       {resumeInfo?.address && (
         <p
           style={{
-            fontSize: PROFESSIONAL_FONT.body,
+            fontSize: fonts.body,
             margin: '0 0 6px 0',
             lineHeight: 1.4,
           }}
@@ -21,8 +25,8 @@ function ProfessionalHeader({ resumeInfo, themeColor }) {
       )}
       <div style={proRow}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 style={proName(themeColor)}>{fullName || 'Your Name'}</h1>
-          {resumeInfo?.website && (
+          <h1 style={proName(themeColor, fonts)}>{fullName || 'Your Name'}</h1>
+          {resumeInfo?.website && !isSocialWebsiteUrl(resumeInfo.website) && (
             <a
               href={
                 resumeInfo.website.startsWith('http')
@@ -30,7 +34,7 @@ function ProfessionalHeader({ resumeInfo, themeColor }) {
                   : `https://${resumeInfo.website}`
               }
               style={{
-                fontSize: PROFESSIONAL_FONT.body,
+                fontSize: fonts.body,
                 color: themeColor,
                 textDecoration: 'underline',
                 display: 'block',
@@ -42,11 +46,12 @@ function ProfessionalHeader({ resumeInfo, themeColor }) {
               {resumeInfo.website}
             </a>
           )}
+          <ResumeSocialLinks resumeInfo={resumeInfo} variant="professional" />
         </div>
         <div
           style={{
             textAlign: 'right',
-            fontSize: PROFESSIONAL_FONT.body,
+            fontSize: fonts.body,
             flexShrink: 0,
             lineHeight: 1.4,
           }}

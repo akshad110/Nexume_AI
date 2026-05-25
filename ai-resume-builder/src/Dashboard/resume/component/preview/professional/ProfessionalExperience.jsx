@@ -1,18 +1,19 @@
 import React from 'react'
-import { PROFESSIONAL_FONT, proRow } from '@/lib/resumeExportStyles'
+import { proRow } from '@/lib/resumeExportStyles'
+import RichHtmlContent from '../shared/RichHtmlContent'
 
-function ProfessionalExperience({ experience, themeColor }) {
+function ProfessionalExperience({ experience, themeColor, fonts }) {
   return (
     <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
       {(experience ?? []).map((item, index) => (
         <li
           key={index}
           style={{
-            fontSize: PROFESSIONAL_FONT.body,
+            fontSize: fonts.body,
             marginBottom: index < experience.length - 1 ? '10px' : 0,
           }}
         >
-          <div style={{ ...proRow, fontWeight: 700 }}>
+          <div style={{ ...proRow, fontWeight: 700, fontSize: fonts.section }}>
             <span style={{ color: themeColor }}>{item?.companyName}</span>
             <span style={{ fontWeight: 400, flexShrink: 0, textAlign: 'right' }}>
               {[item?.city, item?.state].filter(Boolean).join(', ')}
@@ -21,7 +22,7 @@ function ProfessionalExperience({ experience, themeColor }) {
           <div
             style={{
               ...proRow,
-              fontSize: PROFESSIONAL_FONT.small,
+              fontSize: fonts.small,
               fontStyle: 'italic',
               marginTop: '2px',
             }}
@@ -40,14 +41,13 @@ function ProfessionalExperience({ experience, themeColor }) {
             </span>
           </div>
           {item?.workSummery && (
-            <div
-              className="pro-exp-html"
+            <RichHtmlContent
+              html={item.workSummery}
               style={{
                 marginTop: '4px',
-                fontSize: PROFESSIONAL_FONT.small,
+                fontSize: fonts.body,
                 fontStyle: 'normal',
               }}
-              dangerouslySetInnerHTML={{ __html: item.workSummery }}
             />
           )}
         </li>

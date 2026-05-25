@@ -11,7 +11,7 @@ export default defineConfig({
   ],
 
   optimizeDeps: {
-    include: ["html2canvas", "jspdf", "modern-screenshot"],
+    include: ["html2canvas", "jspdf", "modern-screenshot", "framer-motion"],
   },
 
   server: {

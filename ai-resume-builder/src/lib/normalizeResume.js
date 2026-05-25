@@ -1,5 +1,8 @@
 import { DEFAULT_THEME_COLOR } from '@/data/resumeThemes'
 import { DEFAULT_TEMPLATE_ID } from '@/data/resumeTemplates'
+import { getActiveBodySize, getActiveHeadingSize } from '@/data/resumeTypography'
+import { normalizeSectionLayout } from '@/lib/resumeSectionLayout'
+import { getSocialLink, unwrapStrapiEntity } from '@/lib/resumeLinks'
 
 function normalizeSkills(data) {
   if (Array.isArray(data.skills) && data.skills.length) {
@@ -43,27 +46,28 @@ function normalizeSkills(data) {
 export function normalizeResume(data) {
   if (!data) return data
 
+  const flat = unwrapStrapiEntity(data)
+
   return {
-    ...data,
-    templateId: data.templateId || DEFAULT_TEMPLATE_ID,
-    themeColor: data.themeColor || DEFAULT_THEME_COLOR,
-    education: Array.isArray(data.education) ? data.education : [],
-    experience: Array.isArray(data.experience) ? data.experience : [],
-    skills: normalizeSkills(data),
-    projects: Array.isArray(data.projects)
-      ? data.projects.map((p) => ({
+    ...flat,
+    templateId: flat.templateId || DEFAULT_TEMPLATE_ID,
+    themeColor: flat.themeColor || DEFAULT_THEME_COLOR,
+    headingFontSize: getActiveHeadingSize(flat),
+    bodyFontSize: getActiveBodySize(flat),
+    education: Array.isArray(flat.education) ? flat.education : [],
+    experience: Array.isArray(flat.experience) ? flat.experience : [],
+    skills: normalizeSkills(flat),
+    projects: Array.isArray(flat.projects)
+      ? flat.projects.map((p) => ({
           name: p.name || '',
           techUsed: p.techUsed || '',
           description: p.description || '',
         }))
       : [],
-    website: data.website || '',
-    customSections: Array.isArray(data.customSections) ? data.customSections : [],
-    sectionVisibility: {
-      experience: true,
-      ...(typeof data.sectionVisibility === 'object' && data.sectionVisibility
-        ? data.sectionVisibility
-        : {}),
-    },
+    website: flat.website || '',
+    linkedin: getSocialLink(flat, 'linkedin'),
+    github: getSocialLink(flat, 'github'),
+    customSections: Array.isArray(flat.customSections) ? flat.customSections : [],
+    ...normalizeSectionLayout(flat),
   }
 }

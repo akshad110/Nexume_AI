@@ -1,9 +1,13 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useUser } from '@clerk/react'
-import ScrollReveal from './ScrollReveal'
+import { ExternalLink, FileText, Globe, ScanSearch, Share2, Sparkles } from 'lucide-react'
 import BrandLogo from '@/components/brand/BrandLogo'
 import { BRAND_NAME } from '@/config/brand'
+import {
+  FooterBackgroundGradient,
+  TextHoverEffect,
+} from '@/components/ui/hover-footer'
 
 const PRODUCT_LINKS = [
   { label: 'Dashboard', to: '/dashboard' },
@@ -12,148 +16,141 @@ const PRODUCT_LINKS = [
   { label: 'Create resume', to: '/auth/sign-in' },
 ]
 
-const RESOURCE_LINKS = [
+const EXPLORE_LINKS = [
   { label: 'Features', href: '/#features' },
   { label: 'How it works', href: '/#process' },
   { label: 'Home', to: '/' },
   { label: 'Sign in', to: '/auth/sign-in' },
 ]
 
-function FooterLink({ item }) {
-  const className =
-    'text-gray-400 hover:text-white transition-colors text-sm font-medium inline-flex items-center gap-1 group'
+const FOOTER_SECTIONS = [
+  {
+    title: 'Product',
+    links: PRODUCT_LINKS,
+  },
+  {
+    title: 'Explore',
+    links: EXPLORE_LINKS,
+  },
+]
 
-  const inner = (
-    <span className="group-hover:translate-x-0.5 transition-transform duration-200">
-      {item.label}
-    </span>
-  )
+function FooterNavLink({ item }) {
+  const className = 'text-gray-400 hover:text-[#3ca2fa] transition-colors text-sm'
 
   if (item.href) {
     return (
       <a href={item.href} className={className}>
-        {inner}
+        {item.label}
       </a>
     )
   }
 
   return (
     <Link to={item.to} className={className}>
-      {inner}
+      {item.label}
     </Link>
   )
 }
-
-const HIGHLIGHTS = [
-  '3 professional templates',
-  'Live A4 preview',
-  'ATS job match scan',
-  'One-click PDF export',
-]
 
 function LandingFooter() {
   const year = new Date().getFullYear()
   const { isSignedIn } = useUser()
   const startHref = isSignedIn ? '/dashboard' : '/auth/sign-in'
 
+  const contactInfo = [
+    {
+      icon: <Sparkles size={18} className="text-[#3ca2fa] shrink-0" />,
+      text: isSignedIn ? 'Open your workspace' : 'Start free today',
+      to: startHref,
+    },
+    {
+      icon: <ScanSearch size={18} className="text-[#3ca2fa] shrink-0" />,
+      text: 'Run an ATS job match scan',
+      to: '/ats-checker',
+    },
+    {
+      icon: <FileText size={18} className="text-[#3ca2fa] shrink-0" />,
+      text: 'Build a print-ready resume',
+      to: '/dashboard',
+    },
+  ]
+
+  const socialLinks = [
+    { icon: <Globe size={20} />, label: 'Website', href: '/' },
+    { icon: <Share2 size={20} />, label: 'Share', href: '/#features' },
+    { icon: <ExternalLink size={20} />, label: 'ATS checker', href: '/ats-checker' },
+  ]
+
   return (
-    <footer className="relative mt-auto overflow-hidden bg-gray-950 text-white">
-      {/* Gradient glow */}
-      <div
-        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] opacity-30 blur-[100px]"
-        style={{
-          background:
-            'radial-gradient(ellipse, rgba(159, 91, 255, 0.5) 0%, rgba(56, 189, 248, 0.3) 40%, transparent 70%)',
-        }}
-      />
-
-      <div className="relative mx-auto max-w-6xl px-5 pt-16 md:pt-20 pb-8">
-        {/* CTA band */}
-        <ScrollReveal>
-          <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-sm px-8 py-10 md:px-12 md:py-12 flex flex-col md:flex-row md:items-center md:justify-between gap-8 mb-16 md:mb-20">
-            <div className="max-w-lg">
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-violet-300 mb-3">
-                Get started
-              </p>
-              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">
-                Your next application deserves a resume that{' '}
-                <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
-                  gets seen
-                </span>
-              </h2>
-              <p className="mt-3 text-gray-400 text-sm leading-relaxed">
-                Build, scan against job posts, and download — free to start.
-              </p>
-            </div>
-            <Link
-              to={startHref}
-              className="inline-flex justify-center items-center shrink-0 rounded-2xl bg-white text-gray-900 font-bold text-sm px-8 py-4 hover:bg-gray-100 shadow-xl shadow-violet-500/10 transition-all hover:-translate-y-0.5"
-            >
-              {isSignedIn ? 'Open workspace' : 'Start free →'}
-            </Link>
-          </div>
-        </ScrollReveal>
-
-        {/* Main grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 pb-14 border-b border-white/10">
-          <ScrollReveal className="lg:col-span-5">
-            <BrandLogo
-              size="xl"
-              linkTo="/"
-              className="group-hover:opacity-90 transition-opacity"
-            />
-            <p className="mt-5 text-gray-400 text-sm leading-relaxed max-w-sm">
+    <footer className="relative mt-auto w-full shrink-0 overflow-hidden bg-black">
+      <div className="relative z-40 mx-auto w-full max-w-7xl px-6 py-12 md:px-10 md:py-14 lg:px-14">
+        <div className="grid grid-cols-1 gap-12 pb-12 md:grid-cols-2 md:gap-8 lg:grid-cols-4 lg:gap-16">
+          <div className="flex flex-col space-y-4">
+            <BrandLogo size="lg" linkTo="/" />
+            <p className="text-sm leading-relaxed text-gray-400">
               The resume workspace for serious job seekers. Structured templates,
               instant ATS feedback, and print-ready PDFs — without the clutter.
             </p>
-            <ul className="mt-6 grid grid-cols-2 gap-x-4 gap-y-2">
-              {HIGHLIGHTS.map((item) => (
-                <li
-                  key={item}
-                  className="text-xs text-gray-500 flex items-center gap-2"
-                >
-                  <span className="h-1 w-1 rounded-full bg-violet-400 shrink-0" />
-                  {item}
+          </div>
+
+          {FOOTER_SECTIONS.map((section) => (
+            <div key={section.title}>
+              <h4 className="mb-6 text-lg font-semibold text-white">{section.title}</h4>
+              <ul className="space-y-3">
+                {section.links.map((link) => (
+                  <li key={link.label}>
+                    <FooterNavLink item={link} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+
+          <div>
+            <h4 className="mb-6 text-lg font-semibold text-white">Get started</h4>
+            <ul className="space-y-4">
+              {contactInfo.map((item) => (
+                <li key={item.text} className="flex items-center space-x-3">
+                  {item.icon}
+                  <Link
+                    to={item.to}
+                    className="text-sm text-gray-400 hover:text-[#3ca2fa] transition-colors"
+                  >
+                    {item.text}
+                  </Link>
                 </li>
               ))}
             </ul>
-          </ScrollReveal>
-
-          <ScrollReveal delay={100} className="lg:col-span-3 lg:col-start-7">
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-5">
-              Product
-            </p>
-            <nav className="flex flex-col gap-3.5">
-              {PRODUCT_LINKS.map((link) => (
-                <FooterLink key={link.label} item={link} />
-              ))}
-            </nav>
-          </ScrollReveal>
-
-          <ScrollReveal delay={180} className="lg:col-span-2">
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-5">
-              Explore
-            </p>
-            <nav className="flex flex-col gap-3.5">
-              {RESOURCE_LINKS.map((link) => (
-                <FooterLink key={link.label} item={link} />
-              ))}
-            </nav>
-          </ScrollReveal>
+          </div>
         </div>
 
-        {/* Bottom bar */}
-        <ScrollReveal delay={80}>
-          <div className="pt-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <p className="text-xs text-gray-500">
-              © {year} {BRAND_NAME}. All rights reserved.
-            </p>
-            <p className="text-xs text-gray-600">
-              Resume builder · ATS checker · PDF export
-            </p>
+        <hr className="my-8 border-t border-gray-700" />
+
+        <div className="flex flex-col items-center justify-between space-y-4 text-sm md:flex-row md:space-y-0">
+          <div className="flex space-x-6 text-gray-400">
+            {socialLinks.map(({ icon, label, href }) => (
+              <Link
+                key={label}
+                to={href}
+                aria-label={label}
+                className="hover:text-[#3ca2fa] transition-colors"
+              >
+                {icon}
+              </Link>
+            ))}
           </div>
-        </ScrollReveal>
+
+          <p className="text-center text-gray-500 md:text-left">
+            &copy; {year} {BRAND_NAME}. All rights reserved.
+          </p>
+        </div>
       </div>
+
+      <div className="-mt-52 hidden h-[28rem] w-full lg:flex lg:pb-0">
+        <TextHoverEffect text="NEXUME" className="z-50 w-full" />
+      </div>
+
+      <FooterBackgroundGradient />
     </footer>
   )
 }

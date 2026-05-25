@@ -107,6 +107,32 @@
   padding-left: 2em;
 }
 
+/* Resume preview / PDF — rich text from WYSIWYG (experience, projects) */
+.resume-export .pro-exp-html ul,
+.pro-exp-html ul {
+  list-style-type: disc;
+  margin: 0.25rem 0 0.375rem 1.25rem;
+  padding: 0;
+}
+
+.resume-export .pro-exp-html ol,
+.pro-exp-html ol {
+  list-style-type: decimal;
+  margin: 0.25rem 0 0.375rem 1.25rem;
+  padding: 0;
+}
+
+.resume-export .pro-exp-html li,
+.pro-exp-html li {
+  display: list-item;
+  margin-bottom: 0.125rem;
+}
+
+.resume-export .pro-exp-html p,
+.pro-exp-html p {
+  margin: 0 0 0.25rem 0;
+}
+
 @keyframes tab-progress {
   from {
     width: 0%;
@@ -118,6 +144,61 @@
 
 .animate-tab-progress {
   animation: tab-progress linear forwards;
+}
+
+@keyframes card-flip-slide-in {
+  0% {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+}
+
+.animate-card-flip-slide-in {
+  animation: card-flip-slide-in 2s ease-in-out infinite;
+}
+
+@keyframes cell-ripple {
+  0% {
+    background-color: #ffffff;
+  }
+  45% {
+    background-color: #f3f4f6;
+  }
+  100% {
+    background-color: #ffffff;
+  }
+}
+
+.animate-cell-ripple {
+  animation-name: cell-ripple;
+  animation-duration: var(--duration, 400ms);
+  animation-delay: var(--delay, 0ms);
+  animation-timing-function: ease-out;
+  animation-fill-mode: none;
+}
+
+.mask-radial-hero {
+  mask-image: radial-gradient(ellipse 120% 90% at 50% 40%, black 40%, transparent 88%);
+  -webkit-mask-image: radial-gradient(ellipse 120% 90% at 50% 40%, black 40%, transparent 88%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-flip-slide-in {
+    animation: none;
+    opacity: 0.4;
+  }
+
+  .animate-cell-ripple {
+    animation: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

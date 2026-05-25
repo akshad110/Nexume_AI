@@ -117,7 +117,7 @@ function AddResume() {
 
             <div>
               <p className="text-sm font-bold text-gray-900 mb-3">Layout</p>
-              <div className="grid min-w-0 grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid min-w-0 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {RESUME_TEMPLATES.map((template) => (
                   <StaticTemplateCard
                     key={template.id}

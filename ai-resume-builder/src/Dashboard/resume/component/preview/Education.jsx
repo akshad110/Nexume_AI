@@ -1,18 +1,18 @@
 import React from 'react'
-import { MODERN_FONT } from '@/lib/resumeExportStyles'
+import { getResumeTypography } from '@/data/resumeTypography'
 import { classicHrStyle } from '@/lib/resumeDividerStyles'
 
 function Education({ resumeInfo, hideTitle = false, variant = 'classic' }) {
+  const fonts = getResumeTypography(resumeInfo)
   const accent = resumeInfo?.themeColor
-  const isModern = variant === 'modern'
 
   return (
     <div className={hideTitle ? 'my-2' : 'my-6'}>
       {!hideTitle && (
         <>
           <h2
-            className="text-center font-bold text-sm mb-2"
-            style={{ color: accent }}
+            className="mb-2 text-center font-bold"
+            style={{ fontSize: fonts.section, color: accent }}
           >
             Education
           </h2>
@@ -22,22 +22,12 @@ function Education({ resumeInfo, hideTitle = false, variant = 'classic' }) {
 
       {(resumeInfo?.education ?? []).map((education, index) => (
         <div key={index} className="my-5">
-          <h3
-            className={isModern ? 'font-bold' : 'text-sm font-bold'}
-            style={{
-              color: accent,
-              ...(isModern ? { fontSize: MODERN_FONT.section } : {}),
-            }}
-          >
+          <h3 className="font-bold" style={{ fontSize: fonts.section, color: accent }}>
             {education.universityName}
           </h3>
           <p
-            className={
-              isModern
-                ? 'flex justify-between flex-wrap gap-1'
-                : 'text-xs flex justify-between flex-wrap gap-1'
-            }
-            style={isModern ? { fontSize: MODERN_FONT.body } : undefined}
+            className="flex flex-wrap justify-between gap-1"
+            style={{ fontSize: fonts.body, color: accent }}
           >
             <span>
               {education?.degree}
@@ -49,10 +39,7 @@ function Education({ resumeInfo, hideTitle = false, variant = 'classic' }) {
             </span>
           </p>
           {education?.description && (
-            <p
-              className={isModern ? 'my-2' : 'text-sm my-2'}
-              style={isModern ? { fontSize: MODERN_FONT.body } : undefined}
-            >
+            <p className="my-2" style={{ fontSize: fonts.body }}>
               {education.description}
             </p>
           )}

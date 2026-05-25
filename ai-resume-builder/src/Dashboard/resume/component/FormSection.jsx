@@ -12,6 +12,8 @@ import SkillsDetails from "./forms/SkillsDetails";
 import ProjectsDetails from "./forms/ProjectsDetails";
 import CustomSectionsDetails from "./forms/CustomSectionsDetails";
 import ThemePicker from "./ThemePicker";
+import TypographyPicker from "./TypographyPicker";
+import SectionLayoutPicker from "./SectionLayoutPicker";
 import { ResumeInfoContext } from "@/context/ResumeContext";
 import { getStepCount, getStepKey, getStepLabel, getTemplateMeta } from "@/data/resumeTemplates";
 import { parseFormStep, canEnableNextForStep } from "@/lib/resumeFormSteps";
@@ -79,6 +81,8 @@ function FormSection({ onDownload, downloading = false }) {
       </p>
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <ThemePicker />
+        <TypographyPicker />
+        <SectionLayoutPicker />
         <div className="flex gap-2 flex-wrap">
           {onDownload && (
             <Button

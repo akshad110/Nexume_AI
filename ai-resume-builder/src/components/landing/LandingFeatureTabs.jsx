@@ -1,223 +1,140 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import ScrollReveal from './ScrollReveal'
-import {
-  MockAtsPanel,
-  MockJobList,
-  MockResumeEditor,
-  MockTemplatePicker,
-} from './mock/LandingMocks'
+import TextRoll from '@/components/ui/text-roll'
 
-const TAB_IDS = ['builder', 'ats', 'templates', 'export']
-
-const TABS = [
-  { id: 'builder', label: 'Resume builder' },
-  { id: 'ats', label: 'ATS intelligence' },
-  { id: 'templates', label: 'Templates' },
-  { id: 'export', label: 'PDF export' },
+const PILLAR_LABELS = [
+  'Resume builder',
+  'ATS intelligence',
+  'Templates',
+  'PDF export',
 ]
 
-const TAB_CONTENT = {
-  builder: {
-    title: 'Build section by section',
-    bullets: [
-      'Live A4 preview as you type',
-      'Personal, experience, education & skills',
-      'Autosave to your workspace',
-    ],
-    gradient: 'from-emerald-50 via-teal-50 to-cyan-50',
-    mock: 'editor',
+const featureCardsData = [
+  {
+    title: 'Resume builder',
+    description:
+      'Build section by section with live A4 preview. Add personal details, experience, education, skills, and custom sections in one clean flow.',
+    link: '/dashboard',
+    background:
+      'linear-gradient(90deg, hsla(233, 100%, 90%, 1) 0%, hsla(0, 0%, 89%, 1) 100%)',
+    textClass: 'text-slate-900',
+    rotation: 'rotate-6',
   },
-  ats: {
-    title: 'Match any job posting',
-    bullets: [
-      'Upload PDF or paste job description',
-      'Keyword gaps & role fit analysis',
-      'Actionable rewrite suggestions',
-    ],
-    gradient: 'from-violet-50 via-purple-50 to-fuchsia-50',
-    mock: 'ats',
+  {
+    title: 'ATS intelligence',
+    description:
+      'Match any job posting with keyword gap analysis, role-fit insights, and actionable rewrite suggestions before you apply.',
+    link: '/ats-checker',
+    background:
+      'linear-gradient(90deg, hsla(197, 14%, 57%, 1) 0%, hsla(192, 17%, 94%, 1) 100%)',
+    textClass: 'text-slate-900',
+    rotation: 'rotate-0',
   },
-  templates: {
-    title: 'Three pro layouts',
-    bullets: [
-      'Classic, Professional & Modern',
-      'Theme colors in one click',
-      'Designed for ATS readability',
-    ],
-    gradient: 'from-amber-50 via-orange-50 to-rose-50',
-    mock: 'templates',
+  {
+    title: 'Templates',
+    description:
+      'Choose from Classic, Professional, and Modern layouts with editable sections and color themes designed for ATS readability.',
+    link: '/dashboard',
+    background:
+      'linear-gradient(90deg, hsla(248, 21%, 15%, 1) 0%, hsla(250, 14%, 61%, 1) 100%)',
+    textClass: 'text-white',
+    rotation: '-rotate-6',
   },
-  export: {
-    title: 'Print-ready PDFs',
-    bullets: [
-      'True A4 pagination',
-      'Download from preview',
-      'Share with recruiters instantly',
-    ],
-    gradient: 'from-sky-50 via-blue-50 to-indigo-50',
-    mock: 'jobs',
+  {
+    title: 'PDF export',
+    description:
+      'Generate print-ready, paginated A4 PDFs that match your preview, so your resume looks polished for recruiters and hiring managers.',
+    link: '/dashboard',
+    background: '#f2fcfe',
+    textClass: 'text-slate-900',
+    rotation: 'rotate-0',
   },
-}
+]
 
-const ROTATE_MS = 5000
-const FADE_MS = 400
-
-function FeatureMock({ type }) {
+function LandingFeatureTabs({ startHref = '/auth/sign-in' }) {
   return (
-    <div className="w-full max-w-md mx-auto">
-      {type === 'editor' && <MockResumeEditor />}
-      {type === 'ats' && <MockAtsPanel />}
-      {type === 'templates' && <MockTemplatePicker />}
-      {type === 'jobs' && <MockJobList />}
-    </div>
-  )
-}
+    <section id="features" className="relative w-full bg-white text-gray-900">
+      {/* Intro — scrolls away, then cards stack */}
+      <div className="relative z-0">
+        <section className="relative h-screen w-full grid place-content-center sticky top-0 bg-white">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:54px_54px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#fff_70%,transparent_100%)]" />
+          <h2 className="relative z-10 px-8 text-center text-4xl font-semibold tracking-tight leading-[120%] text-gray-900 md:text-5xl 2xl:text-6xl">
+            Everything you need to land the interview
+            <br />
+            in one workspace scroll down
+          </h2>
+        </section>
+      </div>
 
-function LandingFeatureTabs({ startHref }) {
-  const [active, setActive] = useState('builder')
-  const [contentVisible, setContentVisible] = useState(true)
-  const [paused, setPaused] = useState(false)
-  const pauseUntil = useRef(0)
-  const activeIndex = TAB_IDS.indexOf(active)
-  const content = TAB_CONTENT[active]
-
-  const goToTab = useCallback((tabId) => {
-    if (tabId === active) return
-    setContentVisible(false)
-    window.setTimeout(() => {
-      setActive(tabId)
-      setContentVisible(true)
-    }, FADE_MS)
-  }, [active])
-
-  const goNext = useCallback(() => {
-    const next = TAB_IDS[(activeIndex + 1) % TAB_IDS.length]
-    goToTab(next)
-  }, [activeIndex, goToTab])
-
-  useEffect(() => {
-    if (paused) return undefined
-
-    const tick = window.setInterval(() => {
-      if (Date.now() < pauseUntil.current) return
-      goNext()
-    }, ROTATE_MS)
-
-    return () => window.clearInterval(tick)
-  }, [paused, goNext])
-
-  const handleManualTab = (tabId) => {
-    pauseUntil.current = Date.now() + ROTATE_MS * 2
-    goToTab(tabId)
-  }
-
-  return (
-    <section id="features" className="mx-auto max-w-6xl px-5 py-16 md:py-20">
-      <ScrollReveal>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 text-center max-w-3xl mx-auto leading-tight">
-          Everything you need to land the interview — in one workspace
-        </h2>
-      </ScrollReveal>
-
-      <ScrollReveal delay={120} className="mt-8">
-        <div
-          className="flex flex-wrap justify-center gap-2"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => {
-            setPaused(false)
-            pauseUntil.current = Date.now() + 1500
-          }}
-        >
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => handleManualTab(tab.id)}
-              className={cn(
-                'relative rounded-2xl px-5 py-2.5 text-sm font-semibold transition-all duration-300 overflow-hidden',
-                active === tab.id
-                  ? 'bg-gray-900 text-white shadow-lg scale-[1.02]'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-400',
-              )}
-            >
-              {tab.label}
-              {active === tab.id && (
-                <span
-                  className="absolute bottom-0 left-0 h-0.5 bg-white/50 animate-tab-progress"
-                  style={{ animationDuration: `${ROTATE_MS}ms` }}
-                />
-              )}
-            </button>
-          ))}
-        </div>
-      </ScrollReveal>
-
-      <ScrollReveal delay={200} className="mt-8">
-        <div
-          className={cn(
-            'rounded-[2rem] border border-gray-200/60 p-6 md:p-10 bg-gradient-to-br shadow-inner transition-all duration-500',
-            content.gradient,
-          )}
-        >
-          <div
-            className={cn(
-              'grid lg:grid-cols-2 gap-10 items-center transition-all duration-[400ms] ease-out',
-              contentVisible
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 translate-y-3',
-            )}
-          >
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900">{content.title}</h3>
-              <ul className="mt-6 space-y-4">
-                {content.bullets.map((b, i) => (
-                  <li
-                    key={b}
-                    className="flex gap-3 text-gray-700 transition-all duration-500"
-                    style={{
-                      transitionDelay: contentVisible ? `${80 + i * 60}ms` : '0ms',
-                      opacity: contentVisible ? 1 : 0,
-                      transform: contentVisible
-                        ? 'translateX(0)'
-                        : 'translateX(-8px)',
-                    }}
+      {/* Stacking cards — each sticks on top of the previous */}
+      <section className="relative w-full bg-white">
+        <div className="mx-auto flex max-w-7xl flex-col gap-0 px-5 lg:flex-row lg:justify-between lg:px-16">
+          <div className="relative w-full lg:w-[55%]">
+            {featureCardsData.map((card, index) => (
+              <figure
+                key={card.title}
+                className="sticky top-0 flex h-screen items-center justify-center"
+                style={{ zIndex: index + 1 }}
+              >
+                <article
+                  className={cn(
+                    'grid h-72 w-full max-w-[30rem] place-content-center gap-4 rounded-lg p-6 shadow-2xl',
+                    card.textClass,
+                    card.rotation,
+                  )}
+                  style={{ background: card.background }}
+                >
+                  <h3 className="text-2xl font-semibold">{card.title}</h3>
+                  <p className="text-sm leading-relaxed opacity-90">{card.description}</p>
+                  <Link
+                    to={card.link}
+                    className={cn(
+                      'w-fit cursor-pointer rounded-md p-3 text-sm font-semibold transition-colors',
+                      card.textClass === 'text-white'
+                        ? 'bg-white text-slate-900 hover:bg-white/90'
+                        : 'bg-black text-white hover:bg-black/90',
+                    )}
                   >
-                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-gray-900" />
-                    <span className="text-base leading-relaxed">{b}</span>
+                    Open feature
+                  </Link>
+                </article>
+              </figure>
+            ))}
+          </div>
+
+          <div
+            className="sticky top-0 hidden h-screen items-center justify-center lg:flex lg:w-[40%]"
+            style={{ zIndex: featureCardsData.length + 2 }}
+          >
+            <div className="text-center">
+              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gray-500 mb-4">
+                Four pillars
+              </p>
+              <ul className="flex flex-col items-center gap-1 px-4">
+                {PILLAR_LABELS.map((label) => (
+                  <li
+                    key={label}
+                    className="relative flex cursor-pointer flex-col items-center overflow-visible"
+                  >
+                    <TextRoll
+                      center
+                      text={label}
+                      className="block cursor-pointer text-4xl font-extrabold leading-[0.8] tracking-[-0.03em] text-gray-900 transition-colors lg:text-5xl"
+                    />
                   </li>
                 ))}
               </ul>
               <Link
                 to={startHref}
-                className="mt-8 inline-flex rounded-2xl bg-gray-900 text-white font-bold text-sm px-6 py-3.5 hover:bg-gray-800 transition-colors"
+                className="mx-auto mt-8 block w-fit rounded-md bg-gray-900 px-5 py-3 font-semibold text-white hover:bg-gray-800 transition-colors"
               >
                 Start for free
               </Link>
             </div>
-
-            <div className="relative min-h-[220px] flex items-center justify-center">
-              <FeatureMock type={content.mock} />
-            </div>
-          </div>
-
-          <div className="mt-6 flex justify-center gap-1.5">
-            {TAB_IDS.map((id) => (
-              <button
-                key={id}
-                type="button"
-                aria-label={`Show ${id}`}
-                onClick={() => handleManualTab(id)}
-                className={cn(
-                  'h-1.5 rounded-full transition-all duration-300',
-                  active === id ? 'w-8 bg-gray-900' : 'w-1.5 bg-gray-300 hover:bg-gray-500',
-                )}
-              />
-            ))}
           </div>
         </div>
-      </ScrollReveal>
+      </section>
     </section>
   )
 }

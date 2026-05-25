@@ -18,6 +18,10 @@ const ACCEPTED_TYPES = {
 }
 
 const MAX_FILE_MB = 10
+/** Past this length the job description box stops growing and scrolls instead */
+const JOB_DESC_SCROLL_AT = 350
+const JOB_DESC_MIN_HEIGHT_PX = 140
+const JOB_DESC_MAX_HEIGHT_PX = 200
 
 const TIPS = [
   { title: 'Paste the full job ad', desc: 'Include requirements & nice-to-haves' },
@@ -28,6 +32,7 @@ const TIPS = [
 function AtsChecker() {
   const location = useLocation()
   const fileInputRef = useRef(null)
+  const jobDescRef = useRef(null)
   const [jobDescription, setJobDescription] = useState('')
   const [resumeFile, setResumeFile] = useState(null)
   const [resumeText, setResumeText] = useState(null)
@@ -73,6 +78,22 @@ function AtsChecker() {
     }
     return true
   }
+
+  useEffect(() => {
+    const el = jobDescRef.current
+    if (!el) return
+
+    if (jobDescription.length > JOB_DESC_SCROLL_AT) {
+      el.style.height = `${JOB_DESC_MAX_HEIGHT_PX}px`
+      el.style.overflowY = 'auto'
+      return
+    }
+
+    el.style.overflowY = 'hidden'
+    el.style.height = 'auto'
+    const nextHeight = Math.max(JOB_DESC_MIN_HEIGHT_PX, el.scrollHeight)
+    el.style.height = `${Math.min(nextHeight, JOB_DESC_MAX_HEIGHT_PX)}px`
+  }, [jobDescription])
 
   useEffect(() => {
     const state = location.state
@@ -242,15 +263,23 @@ function AtsChecker() {
                     </span>
                   </legend>
                   <Textarea
+                    ref={jobDescRef}
                     placeholder="Copy everything from the job ad — role, requirements, nice-to-haves…"
-                    className="min-h-[140px] resize-y text-[15px] rounded-xl border-gray-200 bg-gray-50/80 focus:bg-white focus:border-violet-300 focus:ring-violet-200/50"
+                    className={cn(
+                      'min-h-[140px] max-h-[200px] resize-none overflow-y-hidden text-[15px] rounded-xl border-gray-200 bg-gray-50/80 focus:bg-white focus:border-violet-300 focus:ring-violet-200/50 [field-sizing:fixed]',
+                      jobDescription.length > JOB_DESC_SCROLL_AT && 'overflow-y-auto',
+                    )}
                     value={jobDescription}
                     onChange={(e) => setJobDescription(e.target.value)}
                     disabled={loading}
                   />
                   <p className="text-xs text-gray-400 font-medium">
                     {jobDescription.length > 0
-                      ? `${jobDescription.length.toLocaleString()} characters`
+                      ? `${jobDescription.length.toLocaleString()} characters${
+                          jobDescription.length > JOB_DESC_SCROLL_AT
+                            ? ' · scroll inside the box'
+                            : ''
+                        }`
                       : 'More detail = sharper feedback'}
                   </p>
                 </fieldset>

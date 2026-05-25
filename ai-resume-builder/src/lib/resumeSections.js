@@ -1,6 +1,8 @@
+import { isSectionVisible } from '@/lib/resumeSectionLayout'
+
 /** Whether the experience block appears on the resume preview/PDF */
 export function isExperienceEnabled(resumeInfo) {
-  return resumeInfo?.sectionVisibility?.experience !== false
+  return isSectionVisible(resumeInfo, 'experience')
 }
 
 export function hasExperienceContent(resumeInfo) {

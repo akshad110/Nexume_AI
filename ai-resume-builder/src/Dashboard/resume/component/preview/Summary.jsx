@@ -1,16 +1,11 @@
 import React from 'react'
-import { MODERN_FONT } from '@/lib/resumeExportStyles'
+import { getResumeTypography } from '@/data/resumeTypography'
 
-function Summary({ resumeInfo, variant = 'classic' }) {
-  const isModern = variant === 'modern'
+function Summary({ resumeInfo }) {
+  const fonts = getResumeTypography(resumeInfo)
 
   return (
-    <p
-      className={isModern ? undefined : 'text-xs'}
-      style={isModern ? { fontSize: MODERN_FONT.body, margin: 0 } : undefined}
-    >
-      {resumeInfo?.summery}
-    </p>
+    <p style={{ fontSize: fonts.body, margin: 0 }}>{resumeInfo?.summery}</p>
   )
 }
 

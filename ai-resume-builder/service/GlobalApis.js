@@ -5,11 +5,11 @@ const STRAPI_BASE =
   import.meta.env.VITE_STRAPI_API_URL ||
   (import.meta.env.DEV ? "http://localhost:1337/api" : "");
 
-if (!STRAPI_BASE && import.meta.env.PROD) {
-  console.error(
-    "VITE_STRAPI_API_URL is missing. Add it in Render → Environment, then Manual Deploy the static site."
-  );
-}
+// if (!STRAPI_BASE && import.meta.env.PROD) {
+//   console.error(
+//     "VITE_STRAPI_API_URL is missing. Add it in Render → Environment, then Manual Deploy the static site."
+//   );
+// }
 
 const axiosClient = axios.create({
   baseURL: STRAPI_BASE.replace(/\/$/, ""),
