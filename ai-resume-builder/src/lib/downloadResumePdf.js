@@ -1,3 +1,4 @@
+import { jsPDF } from 'jspdf'
 import { domToCanvas } from 'modern-screenshot'
 import { resumeToPlainText } from './resumeToPlainText'
 import { mountExportPreview, waitForExportReady } from './exportResumeMount'
@@ -16,7 +17,6 @@ export async function buildTextPdfFromResume(resume) {
     throw new Error('Resume has no content to export')
   }
 
-  const { jsPDF } = await import('jspdf')
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
 
   const margin = 14
@@ -156,8 +156,6 @@ export async function buildVisualPdfFromElement(previewRoot, resume = null) {
   if (!previewRoot) {
     throw new Error('Resume preview is not ready')
   }
-
-  const { jsPDF } = await import('jspdf')
 
   if (document.fonts?.ready) {
     await document.fonts.ready

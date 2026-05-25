@@ -101,7 +101,14 @@ export function normalizeAiResumeData(raw, { templateId, userEmail, userName }) 
     experience: Array.isArray(data?.experience) ? data.experience : [],
     skills: Array.isArray(data?.skills) ? data.skills : [],
     projects: Array.isArray(data?.projects) ? data.projects : [],
-    customSections: Array.isArray(data?.customSections) ? data.customSections : [],
+    customSections: Array.isArray(data?.customSections)
+      ? data.customSections
+          .map((section) => ({
+            title: String(section?.title ?? '').trim(),
+            content: String(section?.content ?? '').trim(),
+          }))
+          .filter((section) => section.title || section.content)
+      : [],
     programmingSkills: { languages: '', technologies: '' },
     ...normalizeSectionLayout(data),
     userEmail: userEmail || '',

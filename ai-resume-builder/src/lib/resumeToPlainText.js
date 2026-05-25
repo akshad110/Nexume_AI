@@ -65,10 +65,19 @@ export function resumeToPlainText(resume) {
   }
 
   if (Array.isArray(resume.skills) && resume.skills.length) {
-    lines.push(
-      'SKILLS',
-      resume.skills.map((s) => s.name).filter(Boolean).join(', '),
-    )
+    lines.push('', 'SKILLS')
+    resume.skills.forEach((skill) => {
+      if (!skill) return
+      const label = (skill.title || skill.name || '').trim()
+      const items = Array.isArray(skill.skills)
+        ? skill.skills.filter(Boolean).join(', ')
+        : typeof skill.skills === 'string'
+          ? skill.skills.trim()
+          : ''
+      if (label && items) lines.push(`${label}: ${items}`)
+      else if (items) lines.push(items)
+      else if (label) lines.push(label)
+    })
   }
 
   const ps = resume.programmingSkills
@@ -89,8 +98,9 @@ export function resumeToPlainText(resume) {
   }
 
   getCustomSections(resume).forEach((section) => {
-    lines.push('', section.title.toUpperCase())
-    const body = stripHtml(section.content)
+    const title = (section?.title || 'Additional').trim()
+    lines.push('', title.toUpperCase())
+    const body = stripHtml(section?.content)
     if (body) lines.push(body)
   })
 
